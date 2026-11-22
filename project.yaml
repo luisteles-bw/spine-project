@@ -1,0 +1,17 @@
+id: spine
+name: Spine, deterministic SDLC framework
+client: internal
+status: active               # pre-sale | active | support | maintenance | closed
+profile: none                # the spine is a TypeScript CLI; stack profiles are something it ships, not uses
+repo:
+  owner: agency
+  url: ""                    # fill in after `gh repo create` for code/
+  transfer_at_handover: false
+hosting:
+  owner: agency
+  platform: none
+increments: [I01]
+current_increment: I01
+case:
+  outcome: ""
+  can_reference: false

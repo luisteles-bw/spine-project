@@ -1,0 +1,12 @@
+id: I01
+title: Spine MVP
+tier: M
+track: M
+stages: [discovery, architecture, development, quality, delivery]   # no support stage: internal tool
+currency: EUR
+billing_items: []            # internal work, not billed
+dates:
+  start: 2026-11-22
+  target: 2026-12-13         # three focused weeks, from the spec's build order
+persona: null
+solution_type: internal-tool
