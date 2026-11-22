@@ -4,7 +4,7 @@ type: security
 title: Spine threat model and security requirements
 stage: discovery
 status: approved
-version: 1
+version: 2
 refs: [SPEC, REQUIREMENTS]
 visibility: internal
 author: architect
@@ -12,8 +12,14 @@ updated: 2026-11-22
 ---
 
 The spine's job is to keep AI agents inside limits. Its worst failure is an agent getting around a
-limit: passing a gate, writing outside its scope, or reaching a secret. The Architect refines this
-in the architecture stage.
+limit: passing a gate, writing outside its scope, or reaching a secret. The architecture stage
+refined the mechanisms (ADR-006, ADR-009, ADR-010, ADR-011, ADR-012, ADR-015, ADR-017).
+
+**Tiering (ADR-017).** These security guarantees are claimed only on **macOS (tier 1)**, where the
+red-team checklist (ADR-015) is verified. **Linux and WSL2 are tier 2** — exercised in CI but not
+red-teamed until agent sessions run there. The real controls are the Claude Code **sandbox**, the
+spine's **submit-time** scope-diff and record hashes, and the **OS-enforced** human-only boundary; the
+guard hook is a fast tripwire, not the wall.
 
 ## Assets
 | Asset | Where it lives | Why it matters |
@@ -40,7 +46,7 @@ in the architecture stage.
 ## Security requirements
 | ID | Requirement |
 | --- | --- |
-| SEC-001 | `spine approve` and `spine reject` refuse to run inside an agent's shell. Detect it through the environment Claude Code sets for its commands (verify the exact variable in the architecture stage) and through the guard hook. |
+| SEC-001 | `approve`, `reject` and the other human-only commands live in a **separate `spine-admin` binary that is not in the sandbox's `excludedCommands`**, so an agent that runs it is sandboxed and `denyWrite` blocks it; the human runs it in a terminal outside Claude Code. Env-var/TTY detection is **not** relied on (both are spoofable). A `Bash(spine-admin *)` deny gives agents a clean refusal. (ADR-012) |
 | SEC-002 | Only spine commands write `project/state/`. The guard blocks direct edits, and the spine detects state that doesn't match the log. |
 | SEC-003 | Every gate decision is an event with who, when and the note. |
 | SEC-004 | `spine guard` allows writes only inside the active role's paths and the task's `scope.touch`; the Coder can never edit the current attempt's tests. |
