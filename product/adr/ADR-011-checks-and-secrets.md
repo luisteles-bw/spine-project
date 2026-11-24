@@ -5,11 +5,11 @@ title: Checks & secrets — sandbox-runtime containment, direct tool invocation,
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-040, REQ-041, SEC-005, SEC-006]
 visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -34,7 +34,11 @@ must contain the project code a check runs. Targets macOS and Linux, Windows via
   writes a secret to a file for an agent to read, and a server secret accidentally bundled into the
   static site.
 - **Verification:** a test asserts a sandboxed check **cannot read the keychain** (`security
-  find-generic-password` must fail inside it). If it can, this ADR needs another answer.
+  find-generic-password` must fail inside it). This test is a **P07 release blocker**: the keychain
+  is closed only if sandbox-runtime's default Seatbelt/bwrap profile denies the keychain's Mach
+  services (`com.apple.securityd`) — a default the spine cannot set or inspect. If the test fails,
+  the fallback is to not inject keychain secrets into sandboxed checks at all (supply the `build`
+  token via an env store the sandbox denies-read), not to write a hand-rolled profile.
 
 ### Check commands — direct tools, not package.json scripts
 - argv arrays in `spine.yaml`, spawned via `execFile` (no shell, SEC-009), but **calling tools
@@ -63,6 +67,10 @@ must contain the project code a check runs. Targets macOS and Linux, Windows via
 - **Easier:** project code runs contained without hand-rolled profiles; per-check least-privilege + the
   post-check sweep close the "write a secret to a file" path; checks can't be faked by editing
   package.json; redaction covers encodings and chunk splits.
+- **Limitation:** redaction and the post-check sweep match the injected value and its base64/URL
+  forms; a check that derives a transformed secret (hash, hex, JSON-escape) and prints it would
+  evade both. This is bounded by least-privilege — `test` checks receive no secrets, so there is
+  nothing to transform.
 - **Harder:** `@anthropic-ai/sandbox-runtime` is a pinned research-preview dependency (gate; API may
   change); per-check network allowlists and secret maps live in the profile; the WSL no-keyring fallback
   and the keychain Bash denies are more human-applied settings; checks call tools directly (a deliberate
@@ -73,3 +81,7 @@ must contain the project code a check runs. Targets macOS and Linux, Windows via
   redaction, Vitest JSON, keychain adapter + WSL fallback) and the keychain-unreadable test; the human
   adds the `security` / `secret-tool` Bash denies (plan table). Phases: see `I01-PLAN`'s ADR→phase table.
 - **Amended 2026-11-23:** phase numbers removed; visibility → internal.
+- **Amended 2026-11-24 (ADR-011 review):** keychain-unreadable test made a P07 release blocker with
+  a named fallback (no secret injection if profile doesn't deny keychain Mach services); redaction
+  limitation stated in Consequences (transformed secrets evade value-match; bounded by test-gets-no-
+  secrets rule); SEC-006 and REQ-041 updated to include post-check sweep.

@@ -4,7 +4,7 @@ type: requirements
 title: Spine MVP requirements
 stage: discovery
 status: approved
-version: 3
+version: 4
 refs: [SPEC, CONCEPT]
 visibility: internal
 author: architect
@@ -59,7 +59,7 @@ The Architect may refine wording and priority in the architecture stage (bump `v
 | ID | Requirement | Acceptance (summary) | Priority | Spec section |
 | --- | --- | --- | --- | --- |
 | REQ-040 | `spine check` runs the configured commands and writes `checks.json` | Exit codes and summaries recorded; secrets never appear in output | Must | Spine CLI |
-| REQ-041 | Secrets for checks come from the OS keychain and reach only the check process | Agents' shells never receive them | Should | Secrets and security |
+| REQ-041 | Secrets for checks come from the OS keychain and reach only the check process; least-privilege per check; post-check sweep fails on any hit | Agents' shells never receive them; changed+untracked files contain no injected values | Should | Secrets and security |
 | REQ-042 | Branch per phase, commit per task, Conventional Commits with trailers | `git log --grep "Task: P03-T02"` finds the task's commit | Must | Git conventions |
 | REQ-043 | `spine pr <phase>` pushes and opens the PR with a generated body | Body lists tasks, criteria, checks, security verdict and manual criteria | Must | Git conventions |
 | REQ-044 | Changelog and semantic version tag at release | Generated from commits, grouped by type | Should | Git conventions |

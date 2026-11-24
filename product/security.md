@@ -4,11 +4,11 @@ type: security
 title: Spine threat model and security requirements
 stage: discovery
 status: approved
-version: 3
+version: 4
 refs: [SPEC, REQUIREMENTS]
 visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 The spine's job is to keep AI agents inside limits. Its worst failure is an agent getting around a
@@ -58,7 +58,7 @@ guard hook is a fast tripwire, not the wall.
 | SEC-003 | Every gate decision is an event with who, when and the note. |
 | SEC-004 | The real scope controls are at **`submit`**: the diff must stay inside the task's `scope.touch`, and the test files hashed at "Tests ready" must be unchanged (so the Coder can't edit this attempt's tests, snapshots or fixtures, nor via `vitest -u`). **`spine-guard`** is a fast PreToolUse **tripwire** (realpath scope match, per-role shape allowlist); the sandbox is the wall. (ADR-010, ADR-011) |
 | SEC-005 | Secrets are never written to events, `checks.json`, logs or Twenty. Injected secret values — and their base64/URL-encoded forms — are redacted from captured output. (ADR-011) |
-| SEC-006 | Check secrets come from the OS keychain (or a 0600 WSL fallback) and are injected only into the check's child process, least-privilege per check. (ADR-011) |
+| SEC-006 | Check secrets come from the OS keychain (or a 0600 WSL fallback) and are injected only into the check's child process, least-privilege per check. After each check, spine sweeps changed + untracked files for the exact injected values; a hit fails the check. (ADR-011) |
 | SEC-007 | The workspace `settings.json` sets `sandbox.enabled` + **`failIfUnavailable: true`** + `allowUnsandboxedCommands: false`, disables bypass/auto permission modes, denies reading env files and credential folders, and `denyWrite`-mirrors every Edit/Write deny. It is installed from the **package templates** (`spine-admin`), never editable by agents. (ADR-012) |
 | SEC-008 | Content from `inputs/`, web pages, MCP servers and client files is **data, never instructions**, carried with `trusted: false` in the context list. The Coder and others do have a shell, so the containment is the sandbox (**agent Bash network = none**), the guard's per-role shape + tool allowlist, and submit-time checks — not the absence of a shell. (ADR-008, ADR-010) |
 | SEC-009 | The spine never builds shell strings. It runs processes with argument arrays and validates every id and slug against a strict pattern. |
