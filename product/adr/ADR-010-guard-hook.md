@@ -5,11 +5,11 @@ title: Guard hook — one global agent_type-keyed hook, active.json, allowlist t
 stage: architecture
 status: accepted
 superseded_by:
-version: 3
+version: 4
 refs: [REQ-051, REQ-052, SEC-004, SEC-001]
 visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -25,20 +25,24 @@ REQ-052).
 
 ### Role & scope source
 - **One global PreToolUse hook.** The role is the hook input's **`agent_type`** (hooks fire for subagent
-  calls too). No `agent_type` = the **main session** (its own fixed policy). **Unknown agent types are
-  read-only.** (This replaces the spec's per-agent `spine guard --role coder`.)
+  calls too). No `agent_type` = the **main session** (its own fixed policy) **only when no scoped role
+  is active**; if `active.json` holds a scoped role, absent `agent_type` is treated as mismatched and
+  **denied** — the real actor is ambiguous (CC issue #90662 — absent `agent_type` in running subagents;
+  closed won't-fix). **Unknown agent types are read-only.** (This replaces the spec's per-agent
+  `spine guard --role coder`.)
 - Spine writes a tiny **`active.json`** — `{ seq, role, node, attempt, scope:{touch,forbid}, testFiles }`
   — **inside the same ADR-006 lock as the event append**, carrying the event `seq`, so state and
   active-context can't drift. The guard reads only this (O(1)).
 - **Every tool is matched;** a tool the guard doesn't recognise is **denied for scoped roles** (a new
   Claude Code tool can't slip past). Scope matching uses **realpath**, so a symlink inside the scope
   can't point outside it.
-- **Main-session policy** (no `agent_type`): may run `spine` (not `spine-admin`), read, and the
-  dispatch / docs-MCP tools; may **not** write `code/**` or `project/state/**` (only scoped roles write
-  code; only the spine writes state).
-- **Scoped writes require `agent_type == active.json.role`** — a mismatch (stale/mismatched subagent) is
-  denied — and **one scoped role is active at a time** (one checkout, one task; no parallel subagents in
-  the MVP).
+- **Main-session policy** (no `agent_type`, no scoped role active): may run `spine` (not `spine-admin`),
+  read, and the dispatch / docs-MCP tools; may **not** write `code/**` or `project/state/**` (only
+  scoped roles write code; only the spine writes state).
+- **One unified deny rule for scoped writes:** `agent_type` must equal `active.json.role`; absent
+  **or** mismatched `agent_type` while a scoped role is active is **denied** (stale/mismatched
+  subagent, or identity lost per CC #90662). **One scoped role is active at a time** (one checkout,
+  one task; no parallel subagents in the MVP).
 - **Per-role tool allowlist** (so "unknown tools denied" doesn't block legitimate MCP): coder/tester may
   use the docs MCPs (Context7, next-devtools) **read-only**; verifier/security read-only tools; the
   architect may use WebSearch/WebFetch (ask). Anything else is denied for scoped roles.
@@ -60,14 +64,17 @@ REQ-052).
 ### Fail mode — fail closed, exit-2 aware
 - Claude Code blocks a tool **only on exit code 2**; any other non-zero is non-blocking (fails open). So
   the hook command is **`spine-guard || exit 2`**.
-- The guard enforces its **own short deadline** and exits 2 on reaching it (not relying on the 60 s hook
-  timeout).
+- The guard enforces its **own short deadline** and exits 2 on reaching it (not relying on CC's
+  command-hook timeout — 600 s default, 30 s on some hook types).
 - It **never spawns processes**, and treats `tool_input` as **untrusted data** (hooks run outside the
   sandbox with full access).
 - **No off switch** in `spine.yaml` or env; a misbehaving guard is handled by rolling back to the
   previous tarball (ADR-001).
-- **Deny Edit/Write on `~/.claude/**`**, so an agent can't slip `disableAllHooks` into user settings via
-  a reflex-approved prompt.
+- **Deny Edit/Write on `~/.claude/**`**, so an agent can't slip `disableAllHooks` into the **settings
+  file** via a reflex-approved prompt. The `--settings '{"disableAllHooks":true}'` CLI flag also sets
+  it and takes precedence over project settings — but agents can't launch their own CC process (Bash
+  allowlist blocks arbitrary processes for scoped roles; main-session may only run `spine`), so the
+  CLI route is out of agents' reach. P01-T04 confirms this assumption.
 
 ## Consequences
 
@@ -87,5 +94,10 @@ REQ-052).
   writes, one-scoped-role-at-a-time, and a per-role MCP tool allowlist; the shape allowlist forbids
   `vitest -u/--update` and testFiles covers snapshots + fixtures; phase numbers removed; visibility →
   internal.
-- **Amended 2026-11-24:** guard denies the `design-reviewer` agent_type reading `topics/*.architect.md`
-  in all modes (ADR-018 review, finding #1).
+- **Amended 2026-11-24 (ADR-018 review):** guard denies the `design-reviewer` agent_type reading
+  `topics/*.architect.md` in all modes.
+- **Amended 2026-11-24 (ADR-010 review):** absent `agent_type` while a scoped role is active is
+  denied (not silently treated as main-session) — unified deny rule for absent/mismatched cases;
+  stale "60 s" timeout replaced with CC's actual defaults (600 s / 30 s); `~/.claude/**` deny
+  clarified to cover the file route only — CLI flag route blocked by Bash allowlist; P01-T04
+  extended to verify `agent_type` consistency and hook sandbox status.
