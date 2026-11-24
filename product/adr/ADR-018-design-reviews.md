@@ -5,7 +5,7 @@ title: Independent design reviews for the architecture stage
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQUIREMENTS, SECURITY, ADR-010]
 visibility: internal
 author: architect
@@ -44,8 +44,9 @@ only file it writes is its review file), runs in three modes:
 
 - The spine **enforces this at `stage_exit`**: the gate refuses unless the required reviews exist and
   every finding has a Response (REQ-090, by tier).
-- Once the guard exists, its read scope for `design-reviewer` in **topic** mode **excludes**
-  `topics/Tnn.architect.md`, so the blind review stays blind (REQ-091).
+- Once the guard exists, it **denies the `design-reviewer` agent_type reading any `topics/*.architect.md`**
+  (all modes — the guard keys on `agent_type`, not mode), so the blind review stays blind; the
+  `/review-topic` orchestrator (main session) reads that file, not the subagent (REQ-091).
 - The reviewer's brief is a **write-protected agent file** once installed into `.claude/`
   (`design-reviewer.md`) plus three write-protected `review-*` commands — covered by SEC-014 / SEC-019;
   the `code/claude/` source is framework-controlled — so an agent can't weaken the review.
@@ -54,6 +55,9 @@ only file it writes is its review file), runs in three modes:
   extra gate precondition; the Architect must keep the recommendation out of the questions file.
 - Applies from now. The reviewer did not exist while I01's architecture ran, so I01's `stage_exit`
   readiness now depends on running these reviews (not done in this task).
+- **Amended 2026-11-24:** applied the ADR-018 adr review — added Options + Impact, clarified
+  write-protection (SEC-014 / SEC-019), and the guard denies `design-reviewer` reading
+  `topics/*.architect.md` in all modes (dropped "in topic mode").
 
 ## Impact
 

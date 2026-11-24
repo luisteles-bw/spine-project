@@ -5,7 +5,7 @@ title: Guard hook — one global agent_type-keyed hook, active.json, allowlist t
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-051, REQ-052, SEC-004, SEC-001]
 visibility: internal
 author: architect
@@ -42,6 +42,8 @@ REQ-052).
 - **Per-role tool allowlist** (so "unknown tools denied" doesn't block legitimate MCP): coder/tester may
   use the docs MCPs (Context7, next-devtools) **read-only**; verifier/security read-only tools; the
   architect may use WebSearch/WebFetch (ask). Anything else is denied for scoped roles.
+- **Design-reviewer read scope** (ADR-018): the `design-reviewer` agent_type is denied reading any
+  `topics/*.architect.md`, in all modes, so its review stays blind to the Architect's recommendation.
 
 ### Bash inspection — per-role allowlist of shapes (a tripwire)
 - The tokenizer feeds a **per-role allowlist of command shapes**, not a denylist. Scoped roles (tester,
@@ -85,3 +87,5 @@ REQ-052).
   writes, one-scoped-role-at-a-time, and a per-role MCP tool allowlist; the shape allowlist forbids
   `vitest -u/--update` and testFiles covers snapshots + fixtures; phase numbers removed; visibility →
   internal.
+- **Amended 2026-11-24:** guard denies the `design-reviewer` agent_type reading `topics/*.architect.md`
+  in all modes (ADR-018 review, finding #1).
