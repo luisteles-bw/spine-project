@@ -4,11 +4,11 @@ type: architecture
 title: Spine architecture
 stage: architecture
 status: draft
-version: 2
-refs: [ADR-001, ADR-002, ADR-003, ADR-004, ADR-005, ADR-006, ADR-007, ADR-008, ADR-009, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015, ADR-016, ADR-017, REQUIREMENTS, SECURITY, SPEC-ERRATA]
+version: 3
+refs: [ADR-001, ADR-002, ADR-003, ADR-004, ADR-005, ADR-006, ADR-007, ADR-008, ADR-009, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015, ADR-016, ADR-017, ADR-018, REQUIREMENTS, SECURITY, SPEC-ERRATA]
 visibility: client
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -16,8 +16,9 @@ updated: 2026-11-23
 The spine is a deterministic SDLC CLI that drives AI-assisted development through documents, gates
 and fixed lifecycles. *The spine decides, agents do the work, the human approves, Twenty displays.*
 
-- **Actors:** the solo developer at the keyboard; five Claude Code subagents (architect, tester,
-  coder, verifier, security); the client (indirect — receives delivered software and Twenty views).
+- **Actors:** the solo developer at the keyboard; five build subagents (architect, tester,
+  coder, verifier, security) plus an architecture-stage-only **design-reviewer** (ADR-018); the client
+  (indirect — receives delivered software and Twenty views).
 - **Outside systems:** Claude Code (the harness — sandbox, permissions, PreToolUse hooks), GitHub (via
   `gh`), a self-hosted Twenty CRM, the OS keychain, the npm registry + official MCP servers, and the
   stack scaffolder (`create-next-app`). The spine **never calls an AI model** (REQ-081).
@@ -121,6 +122,7 @@ increment-creation event so `spine.yaml` edits can't change a replay (REQ-010, A
 | ADR-015 | Four test layers, PATH-level `gh` stub, stateful Twenty fake, red-team, offline CI |
 | ADR-016 | Genesis-event import, dry-run + re-confirmed approvals, reversible checklist |
 | ADR-017 | macOS tier 1 / Linux+WSL2 tier 2; per-command preflight; `spine doctor` self-audit |
+| ADR-018 | Independent design reviews (topic/adr/stage) for the architecture stage; a `stage_exit` precondition |
 
 ## Constraints and non-goals
 
