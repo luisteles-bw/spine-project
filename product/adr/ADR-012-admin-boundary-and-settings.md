@@ -5,7 +5,7 @@ title: Human-only boundary & settings — OS-enforced spine-admin binary, consol
 stage: architecture
 status: accepted
 superseded_by:
-version: 3
+version: 4
 refs: [SEC-001, SEC-002, SEC-007, REQ-013]
 visibility: internal
 author: architect
@@ -50,7 +50,9 @@ must come from user/managed scope to take effect:
 - `sandbox.failIfUnavailable: true` — a missing sandbox must fail, never silently run unsandboxed.
 - `sandbox.allowUnsandboxedCommands: false`
 - `excludedCommands: ["spine *"]` (only the main `spine`; ignored from workspace in admin-required mode)
-- `sandbox.network.strictAllowlist: true` (no `allowedDomains` → agent Bash has no network — D2)
+- `strictAllowlist: true` (no `allowedDomains` → agent Bash has no network — D2). **Key path pending
+  P01-T05**: the CC docs show both `sandbox.strictAllowlist` and `sandbox.network.strictAllowlist`;
+  P01-T05 AC-4 records which the installed CC reads. Requires **Claude Code ≥ v2.1.219**.
 - `sandbox.credentials` masks — token env vars masked at the sandbox boundary
 
 **Workspace (`.claude/settings.json`) — applied by `spine-admin init`/`upgrade`**
@@ -93,7 +95,8 @@ must come from user/managed scope to take effect:
   `spine-guard` is installed.
 - P01 probes each user-level key's effect from `~/.claude/settings.json`; also confirms
   `allowUnsandboxedCommands: false` from user settings does **not** trigger admin-required mode
-  (only managed/`--settings` do).
+  (only managed/`--settings` do); and resolves the `strictAllowlist` key path + the CC ≥ v2.1.219
+  requirement (P01-T05 AC-4).
 
 ## Consequences
 
@@ -122,3 +125,6 @@ must come from user/managed scope to take effect:
   permissions, hook, env; `spine-admin setup` added to human-only list; `spine-admin init` /
   `spine doctor` exit 3 if machine-level block absent; `sandbox.network: none` replaced with correct
   key structure; fully-qualified key paths used throughout; H-track H0 added.
+- **Amended 2026-11-24:** `strictAllowlist` key path marked **pending P01-T05 AC-4** (docs show both
+  `sandbox.strictAllowlist` and `sandbox.network.strictAllowlist`); noted the **CC ≥ v2.1.219**
+  requirement.

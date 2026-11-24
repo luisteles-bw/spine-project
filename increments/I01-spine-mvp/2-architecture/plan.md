@@ -127,13 +127,13 @@ MCP (incl. Context7) runs outside the sandbox, and the excluded `spine` makes it
 | **Bootstrap (now)** | copy `design-reviewer` and the three `review-*` commands into `.claude/` | the architecture stage's independent reviews (ADR-018) run via these | 018 |
 | **Machine setup (H0, `spine-admin setup` → `~/.claude/settings.json`, once per machine)** | `sandbox.failIfUnavailable: true`, `sandbox.allowUnsandboxedCommands: false` | Only honored from user/managed scope; must be present before P01 (`spine-admin init` exits 3 if absent) | 006, 012, D7 |
 | Machine setup (H0) | `excludedCommands: ["spine *"]` | Ignored from workspace scope in admin-required mode; must be user-level | 006, 012, D7 |
-| Machine setup (H0) | `sandbox.network.strictAllowlist: true` (no `allowedDomains`) | Requires user/managed scope; agent Bash has no network (D2) | D2, 012, D7 |
+| Machine setup (H0) | `strictAllowlist: true` (no `allowedDomains`) — **key path pending P01-T05 AC-4** (docs show both `sandbox.strictAllowlist` and `sandbox.network.strictAllowlist`); needs **CC ≥ v2.1.219** | Requires user/managed scope; agent Bash has no network (D2) | D2, 012, D7 |
 | Machine setup (H0) | `sandbox.credentials` masks for token env vars | Requires user/managed scope | 011, 012, D7 |
 | **Baseline (P02)** | `sandbox.enabled: true` | Enable the sandbox | 006, 012 |
 | Baseline (P02) | `sandbox.network.allowedDomains: []` | Workspace-scope duplicate of machine-level strictAllowlist (documentation only; not relied on) | D2, 012, D7 |
 | Baseline (P02) | `disableBypassPermissionsMode: "disable"`, `disableAutoMode: "disable"` | Close the mode-switch escape hatches | 012 |
 | Baseline (P02) | allow `Bash(spine *)`, read-only `git` (status/diff/log/show), `WebSearch`; **allow `git add`/`commit`/`switch`** | Dispatcher commits one per task during bootstrap (D1); `WebSearch` for fact-checking | 009, 010, D1 |
-| Baseline (P02) | ask `Bash(spine pr *)`, `WebFetch` | `spine pr` pushes/opens a PR; ask is evaluated before allow | 009, 012 |
+| Baseline (P02) | ask `Bash(spine pr *)`, `WebFetch` | `spine pr` pushes/opens a PR; ask is evaluated before allow. **WebFetch stays on `ask`**; documentation-domain allow rules deferred to a decision after the stage review | 009, 012 |
 | Baseline (P02) | deny `Bash(spine-admin *)`, `Bash(gh *)`, git push/merge/rebase/reset/checkout/clean/branch-D/tag | Human-only boundary; no `gh` reflex-approvals; spine owns history | 009, 012 |
 | Baseline (P02) | deny **installs**: `pnpm add/remove/up/install/i/update/create`, `pnpm dlx`, `npx`, `npm`, `yarn`, `bunx`, `corepack` | `new_dependency` gate; a speedbump behind D2's no-network | 011, D6 |
 | Baseline (P02) | deny `cat *.env*` / Read `.env*`, `security`, `secret-tool` | Keep secrets off the agent | 011 |
