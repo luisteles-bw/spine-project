@@ -5,7 +5,7 @@ title: Documents — yaml (1.2) parsing, line-scan headings, per-command id inde
 stage: architecture
 status: accepted
 superseded_by:
-version: 3
+version: 4
 refs: [REQ-020, REQ-021, SEC-008]
 visibility: internal
 author: architect
@@ -66,3 +66,4 @@ JS engine `eval`s `---js` frontmatter — unacceptable when docs carry client te
   Phases: see `I01-PLAN`'s ADR→phase table.
 - **Amended 2026-11-23:** phase numbers removed.
 - **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).
+- **Amended 2026-11-24:** in-place frontmatter edits (above) apply to **living** documents only; **records are write-once** and hashed (ADR-006).
