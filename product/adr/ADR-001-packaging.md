@@ -5,11 +5,11 @@ title: One workspace-ready package with a compile-isolated pure core
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-080, REQ-082, SEC-001]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -18,7 +18,7 @@ updated: 2026-11-22
 inside it — so that every lifecycle transition is unit-tested without adapters (REQ-082) and a
 replay of the event log always rebuilds the same `graph.json` (REQ-010). The spine must also install
 as a single `spine` command (REQ-080). This is a solo build over about three weeks, so tooling
-should stay minimal. Two further facts shape packaging: the Twenty app (P08) is a separate Twenty
+should stay minimal. Two further facts shape packaging: the Twenty app (built late) is a separate Twenty
 SDK deployable, and the guard hook runs on every agent tool call, so the `spine` it calls must not
 be weakened by the spine code you are currently editing.
 
@@ -28,7 +28,7 @@ be weakened by the spine code you are currently editing.
 | --- | --- | --- |
 | A. Single package, workspace-ready | Least tooling; one build and one `bin`; purity enforced by tsconfig + ESLint; `twenty-app` can join the pnpm workspace later | Core purity rests on config, not a hard package boundary |
 | B. Full monorepo now | Hard `@spine/core` / `@spine/cli` boundaries; core cannot import an adapter | tsconfig project references, build ordering and inter-package versioning — real ceremony up front |
-| C. Single package, no workspace | Simplest possible | `twenty-app` becomes a messy retrofit in P08 |
+| C. Single package, no workspace | Simplest possible | `twenty-app` becomes a messy retrofit later |
 
 ## Decision
 
@@ -40,7 +40,7 @@ be weakened by the spine code you are currently editing.
   `Math.random()` under `src/core/**`. Time, randomness and id generation enter core as injected
   ports.
 - **Workspace.** A pnpm workspace holds one package now. `twenty-app` joins as a second package in
-  P08 **only if** Twenty's tooling tolerates being a workspace member (verify then); otherwise it is
+  later **only if** Twenty's tooling tolerates being a workspace member (verify then); otherwise it is
   a sibling package with its own install.
 - **Escape hatch.** If boundary violations recur despite tsconfig + ESLint, promote `core` to its
   own package `@spine/core`.
@@ -49,7 +49,7 @@ be weakened by the spine code you are currently editing.
 
 - **Bootstrap → switch-over:** nothing is installed globally. Invoke through a root script,
   `pnpm spine <command>`.
-- **From the switch-over (P04):** the daily `spine` is a global install from a `pnpm pack` tarball of
+- **From the switch-over:** the daily `spine` is a global install from a `pnpm pack` tarball of
   the **last merged phase**. Keep the last two or three tarballs for rollback.
 - The working copy runs as a separate **`spine-dev`** alias pointing at the repo's build output. No
   `pnpm link --global`, which would hijack the `spine` command name.
@@ -64,8 +64,10 @@ be weakened by the spine code you are currently editing.
   stable `spine` and `spine-dev` are different commands; rollback is reinstalling a kept tarball.
 - **Harder:** a second `src/core/tsconfig.json` and ESLint boundary config must be maintained; each
   merged phase must build → pack → reinstall the stable `spine` (automate at release); `twenty-app`
-  workspace membership stays open until P08.
-- **Must now be true:** all clock, randomness and id generation are injected ports into core. P01
-  sets up the workspace, the dual tsconfig, the ESLint boundary rules, the `pnpm spine` script and
-  version `0.1.0-dev.0`. P04 adds the pack + global-install step and the `spine-dev` alias at
-  switch-over. P05 wires the guard to the stable `spine` path.
+  workspace membership stays open until the Twenty phase.
+- **Must now be true:** all clock, randomness and id generation are injected ports into core. The
+  toolchain phase sets up the workspace, the dual tsconfig, the ESLint boundary rules, the `pnpm spine`
+  script and version `0.1.0-dev.0`; the switch-over adds the pack + global-install step and the
+  `spine-dev` alias; the guard phase wires the guard to the stable `spine` path. Phases: see `I01-PLAN`'s
+  ADR→phase table.
+- **Amended 2026-11-23:** phase numbers removed.

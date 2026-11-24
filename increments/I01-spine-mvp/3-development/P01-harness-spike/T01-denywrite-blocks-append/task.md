@@ -17,6 +17,8 @@ tdd: false
 criteria:
   - { id: AC-1, check: manual, text: "When an agent Bash call runs `echo x >> <state-dir>/probe.txt` under a fixture settings.json whose sandbox denyWrite covers <state-dir>, Claude Code blocks the write and the file is unchanged" }
   - { id: AC-2, check: manual, text: "A sandboxed Edit/Write to the same path is also blocked, and with failIfUnavailable:true a missing sandbox makes the command fail rather than run unsandboxed" }
+  - { id: AC-3, check: manual, text: "A sandboxed `cat` / `node -e` read of a `.env` file in a nested directory is blocked by `denyRead` (sandbox path/glob semantics confirmed to cover nested paths)" }
+  - { id: AC-4, check: manual, text: "`sandbox.credentials` masks a token env var: a probe that echoes the var sees a masked value, not the secret" }
 billing: none
 visibility: internal
 author: architect

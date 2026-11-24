@@ -5,11 +5,11 @@ title: Schemas — Zod-first, dates as strings, discriminated unions, additive-o
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-020, REQ-031, REQ-023]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -62,6 +62,8 @@ schemas evolve.
 - **Harder:** the generate → commit → diff-check must stay green; the discriminated union means every
   doc type needs its own strict object; refinements are invisible in the artifact (documented in the
   register); dates-as-strings constrains the YAML loader.
-- **Must now be true:** Topic 5's YAML parser keeps dates as strings; P02 builds the Zod schemas
+- **Must now be true:** the YAML parser keeps dates as strings; the schemas phase builds the Zod schemas
   (discriminated union on `type`), the generate/commit/diff check, and the Ajv contract test; a
-  one-time migration of the bootstrap docs' frontmatter runs before switch-over (a plan item).
+  one-time migration of the bootstrap docs' frontmatter runs before switch-over (a plan item). Phases:
+  see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** phase numbers removed.

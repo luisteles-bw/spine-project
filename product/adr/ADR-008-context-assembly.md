@@ -5,11 +5,11 @@ title: Context assembly — deterministic sliced path list, trust flags, plan-ti
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-024, REQ-031, SEC-008, REQ-033]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -56,6 +56,8 @@ REQ-033).
   are caught at the plan gate.
 - **Harder:** the id index must record line ranges for in-doc ids (extends ADR-005); the recipe table
   must be maintained per `(role, step)`; the renderer must honour a `data.warnings` convention.
-- **Must now be true:** ADR-005's index gains line ranges (implement in P02); P03/P04 build the recipe
-  table, `spine context`, and the attempt-start context snapshot; `plan apply` (P04) includes the
-  per-task context-size check; `spine.yaml` gains a `context` byte budget (~100 KB).
+- **Must now be true:** ADR-005's index gains line ranges (schemas/documents phase); the recipe table,
+  `spine context` and the attempt-start context snapshot are built in the CLI phases; `plan apply`
+  includes the per-task context-size check; `spine.yaml` gains a `context` byte budget (~100 KB). Phases:
+  see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** phase numbers removed.

@@ -5,11 +5,11 @@ title: Git & PR automation — real git via arg arrays, hook-proof, gh CLI, tamp
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-042, REQ-043, SEC-009, SEC-002]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -48,6 +48,10 @@ and the spine must never build shell strings (SEC-009).
 - **Merge-commit only:** on repo creation, disable squash and rebase merges
   (`gh repo edit --enable-squash-merge=false --enable-rebase-merge=false`) — a squash merge would drop
   the per-task commits and their trailers (REQ-042).
+- **Branch protection is conditional on the GitHub plan.** On **Free**, rulesets/branch protection don't
+  exist for **private** repos, so the spine does not require them; integrity rests on the `phase_pr`
+  SHA + ancestry check (which needs no server-side rule) and the merge-method settings (which work on
+  Free). On **Pro/Team** the spine also sets required-status-checks + no-force-push.
 - **Tamper-proof `phase_pr`:** the gate counts only if the PR's final head SHA **equals the SHA
   approved at phase review** and that SHA is an **ancestor of the base branch**
   (`git merge-base --is-ancestor`). This rejects squash merges and any commits pushed after review
@@ -58,10 +62,14 @@ and the spine must never build shell strings (SEC-009).
 - **Easier:** real-git fidelity in tests; injection-proof and hook-proof git; trailer-searchable history
   cross-linked to the log via `Spine-Seq`; a `phase_pr` gate that squash or post-review pushes can't
   fool.
-- **Harder:** we parse porcelain ourselves; repo setup must disable squash/rebase and set branch
-  protection; `spine pr` → `ask` and `code/.git` → denyWrite are more human-applied settings (Topic 12);
-  git ≥ 2.32 is a hard floor.
-- **Must now be true:** P06 builds the git + gh adapters (hooks disabled, explicit staging, `--trailer`,
-  `Spine-Seq`, merge-base ancestry check, version floor); repo creation in init (P07) disables
-  squash/rebase and sets merge-commit-only + branch protection; the human adds `spine pr` to `ask` and
-  `code/.git` to the denyWrite set at switch-over.
+- **Harder:** we parse porcelain ourselves; repo setup disables squash/rebase (and, on Pro/Team, sets
+  branch protection); `spine pr` → `ask` (baseline) and `code/.git` → denyWrite (switch-over) are
+  human-applied settings (plan table); git ≥ 2.32 is a hard floor.
+- **Must now be true:** the git + gh adapters are built in the git/PR phase (hooks disabled, explicit
+  staging, `--trailer`, `Spine-Seq`, merge-base ancestry check, version floor); init disables
+  squash/rebase and sets merge-commit-only (branch protection only on Pro/Team); `spine pr` is in `ask`
+  from the **baseline** settings and `code/.git` joins denyWrite at switch-over. Phases: see `I01-PLAN`'s
+  ADR→phase table.
+- **Amended 2026-11-23:** `spine pr` ask is baseline (not switch-over); branch protection made
+  conditional on the GitHub plan (Free has none for private repos); phase numbers removed; visibility →
+  internal.

@@ -4,11 +4,11 @@ type: requirements
 title: Spine MVP requirements
 stage: discovery
 status: approved
-version: 1
+version: 2
 refs: [SPEC, CONCEPT]
 visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 Derived from `SPEC` v0.4. Each requirement names the spec section it comes from. **Must** is
@@ -18,19 +18,19 @@ The Architect may refine wording and priority in the architecture stage (bump `v
 ## Workspace and initialisation
 | ID | Requirement | Acceptance (summary) | Priority | Spec section |
 | --- | --- | --- | --- | --- |
-| REQ-001 | `spine init` creates a workspace: `code/`, `project/`, `.claude/`, `CLAUDE.md`, `.mcp.json`, `spine.yaml` | Running it in an empty folder produces the layout, both repos initialised, and increment I01 | Must | Workspace layout |
-| REQ-002 | `spine init --profile <name>` runs the profile's official scaffolder and applies its contract | The four root scripts exist and pass on the fresh scaffold; CI and Dependabot files exist | Must | Client code repo |
+| REQ-001 | `spine-admin init` creates a workspace: `code/`, `project/`, `.claude/`, `CLAUDE.md`, `.mcp.json`, `spine.yaml` | Running it in an empty folder produces the layout, both repos initialised, and increment I01 | Must | Workspace layout |
+| REQ-002 | `spine-admin init --profile <name>` runs the profile's official scaffolder and applies its contract | The four root scripts exist and pass on the fresh scaffold; CI and Dependabot files exist | Must | Client code repo |
 | REQ-003 | Profile `nextjs-static` ships with init | A Next.js static site builds and tests green straight after init | Must | Client code repo |
 | REQ-004 | `project.yaml` records repo owner, hosting owner and profile per project | Values are validated and synced to Twenty | Should | Spine CLI |
-| REQ-005 | `spine upgrade` re-installs the framework's `claude/` assets into a workspace and records the version | The workspace's framework version changes only through this command | Could | Workspace layout |
+| REQ-005 | `spine-admin upgrade` re-installs the framework's `claude/` assets into a workspace and records the version | The workspace's framework version changes only through this command | Could | Workspace layout |
 
 ## State, lifecycles and gates
 | ID | Requirement | Acceptance (summary) | Priority | Spec section |
 | --- | --- | --- | --- | --- |
 | REQ-010 | An append-only event log is the single source of truth | `graph.json` rebuilt from the same events is byte-identical every time | Must | Project docs structure |
 | REQ-011 | Five lifecycles (increment stages, phase, task, ticket, change request) as fixed transition rules | An invalid transition is refused with an error naming the current state and allowed moves | Must | Lifecycles |
-| REQ-012 | Gates from `spine.yaml` pass only through `spine approve` / `spine reject` | No other command or file edit moves a node past a gate | Must | Spine CLI |
-| REQ-013 | `spine approve` refuses to run from an agent's shell | Run from Claude Code's Bash tool, it exits non-zero and changes nothing | Must | Security |
+| REQ-012 | Gates from `spine.yaml` pass only through `spine-admin approve` / `spine-admin reject` | No other command or file edit moves a node past a gate | Must | Spine CLI |
+| REQ-013 | `spine-admin approve` cannot change state from an agent's shell | Run from Claude Code's Bash tool it is sandboxed and `denyWrite` blocks it (nothing changes); `Bash(spine-admin *)` is denied for a clean refusal | Must | Security |
 | REQ-014 | Retry ladder: 3 attempts, then one replan, then Blocked with a change request | The fourth failure of a replanned task raises a CR automatically | Must | Lifecycles |
 | REQ-015 | Phase split (before work) and cut (after work starts), one level only | A part cannot split again; every split or cut opens the plan gate | Should | Splitting work |
 | REQ-016 | Size limits enforced at plan apply | A phase over 8 tasks or 24 estimated hours, or a task of size L, is refused | Must | Splitting work |
@@ -67,9 +67,9 @@ The Architect may refine wording and priority in the architecture stage (bump `v
 ## Agents and guard
 | ID | Requirement | Acceptance (summary) | Priority | Spec section |
 | --- | --- | --- | --- | --- |
-| REQ-050 | The framework ships five agents, the slash commands and `settings.json` | `spine init` installs them; they call real spine commands, not `STATE.md` | Must | Agents and Claude Code setup |
-| REQ-051 | `spine guard` (a PreToolUse hook) enforces per-role write scopes and the task's file scope | A Coder edit outside `scope.touch` is blocked with a reason | Must | Agents and Claude Code setup |
-| REQ-052 | The guard inspects whole Bash commands for secret access and gate commands | `node -e` reading `.env`, or `spine approve` from an agent, is blocked | Should | Secrets and security |
+| REQ-050 | The framework ships five agents, the slash commands and `settings.json` | `spine-admin init` installs them; they call real spine commands, not `STATE.md` | Must | Agents and Claude Code setup |
+| REQ-051 | `spine-guard` (a PreToolUse hook) enforces per-role write scopes and the task's file scope | A Coder edit outside `scope.touch` is blocked with a reason | Must | Agents and Claude Code setup |
+| REQ-052 | The guard inspects whole Bash commands for secret access and gate commands | `node -e` reading `.env`, or `spine-admin approve` from an agent, is blocked | Should | Secrets and security |
 
 ## Change requests, increments, tickets, time, export
 | ID | Requirement | Acceptance (summary) | Priority | Spec section |

@@ -17,6 +17,7 @@ tdd: false
 criteria:
   - { id: AC-1, check: manual, text: "A PreToolUse hook that exits 2 blocks the matched Bash call — the command does not run" }
   - { id: AC-2, check: manual, text: "The same hook exiting 1 (or any non-2 code) does NOT block — the call proceeds — confirming the guard command must be `spine-guard || exit 2`" }
+  - { id: AC-3, check: manual, text: "With the hook command `spine-guard || exit 2` and `spine-guard` missing or crashing, the tool call is blocked — the `|| exit 2` makes a missing binary fail closed" }
 billing: none
 visibility: internal
 author: architect

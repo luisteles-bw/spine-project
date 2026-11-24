@@ -5,11 +5,11 @@ title: Toolchain — Node 24 LTS, ESM, tsdown, ESLint + Prettier, tsx
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-080, REQ-082, REQ-083, REQ-010]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -48,9 +48,10 @@ must be enforceable by the linter.
 
 - **Easier:** single-file bundle → fast guard and a clean, self-contained tarball; type-aware lint
   catches dropped promises in state writes; the code stays migration-ready to native type stripping.
-- **Harder:** tsdown is younger than `tsc` (pin it; it is a `new_dependency` gate in P01); type-aware
+- **Harder:** tsdown is younger than `tsc` (pin it; it is a `new_dependency` gate); type-aware
   ESLint is slower than Biome and needs a typed lint config; `erasableSyntaxOnly` forbids enums,
   namespaces and parameter properties — use plain unions and `const` objects instead.
-- **Must now be true:** P01 pins Node 24, sets ESM and the three tsconfig flags, adds
+- **Must now be true:** the toolchain phase pins Node 24, sets ESM and the three tsconfig flags, adds
   tsdown / tsx / eslint / prettier through `new_dependency` gates, and runs `pnpm spine` via `tsx`
-  with the tsdown bundle as the stable artifact.
+  with the tsdown bundle as the stable artifact. Phases: see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** phase numbers removed.

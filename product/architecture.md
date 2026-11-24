@@ -4,11 +4,11 @@ type: architecture
 title: Spine architecture
 stage: architecture
 status: draft
-version: 1
-refs: [ADR-001, ADR-002, ADR-003, ADR-004, ADR-005, ADR-006, ADR-007, ADR-008, ADR-009, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015, ADR-016, ADR-017, REQUIREMENTS, SECURITY]
+version: 2
+refs: [ADR-001, ADR-002, ADR-003, ADR-004, ADR-005, ADR-006, ADR-007, ADR-008, ADR-009, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015, ADR-016, ADR-017, REQUIREMENTS, SECURITY, SPEC-ERRATA]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -130,3 +130,31 @@ increment-creation event so `spine.yaml` edits can't change a replay (REQ-010, A
   (ADR-017).
 - **V2 / out of scope:** Twenty two-way sync and the client portal, a Gantt timeline, parallel worktrees,
   Docker sandboxes, unattended runs, native Windows (ADR-017), and the other four stack profiles.
+
+## State directory layout
+
+All state lives under `project/state/` and is covered by the switch-over `denyWrite` (ADR-012); only the
+excluded `spine` writes it.
+
+| File | Committed? | Role |
+| --- | --- | --- |
+| `events.jsonl` | committed | the sole source of truth (ADR-006) |
+| `graph.json` | committed | derived, write-only projection; a diffable snapshot for sync/export (ADR-005) |
+| `crm-ids.json` | committed | Twenty id cache, rebuildable from `spineId` (ADR-014) |
+| `active.json` | gitignored | ephemeral guard view, rewritten inside the state lock each step (ADR-010) |
+| `.lock` | gitignored | the `O_EXCL` lock (ADR-006) |
+
+The committed files are the second audit trail beside git; the gitignored ones are ephemeral but still
+`denyWrite` for agents (the glob `project/state/**` covers all five).
+
+## Superseded wording
+
+`I01-BRIEF` and `SPEC` are closed/approved records; where the architecture stage moved past their wording,
+read them through this map (spec details in `SPEC-ERRATA`).
+
+| Source | Original | Now |
+| --- | --- | --- |
+| Brief, success measure 2 | "`spine approve` fails [from an agent shell]" | **`spine-admin approve`** fails — OS-enforced, not env-detected (ADR-012) |
+| Brief, suggested outline | 11 phases; P07 init, P08 Twenty, P11 delivery | the plan's **15 phases**: init **P11**, Twenty **P12**, delivery **P15** (I01-PLAN) |
+| Brief, risk "env var detects agent shell" | guard blocks `spine approve` as a second layer | detection dropped; the boundary is the `spine-admin` binary + sandbox `denyWrite` (ADR-012) |
+| `SPEC` | command names, per-agent hook, settings example, checks-as-scripts | see `SPEC-ERRATA` |

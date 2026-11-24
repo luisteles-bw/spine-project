@@ -5,11 +5,11 @@ title: CLI contract — commander in routing-only mode, uniform JSON envelope, t
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-020, REQ-031, REQ-051]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -63,5 +63,7 @@ envelope schema.
   `INTERNAL` into exit 3 widens code 3 to "environment **or** internal error" — update
   `conventions.md` at session close.
 - **Must now be true:** Topic 4 picks the value-schema library that produces the `details` shape;
-  P01/P04 build the renderer, exit table, envelope schema and the separate guard bin; the `--json`
-  contract test is part of the CLI phase.
+  the renderer, exit table and envelope schema are built in the CLI phase and the separate guard bin in
+  the guard phase; the `--json` contract test is part of the CLI phase. Phases: see `I01-PLAN`'s
+  ADR→phase table.
+- **Amended 2026-11-23:** phase numbers removed.

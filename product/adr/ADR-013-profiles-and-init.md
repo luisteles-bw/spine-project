@@ -5,16 +5,16 @@ title: Profiles & init — package-shipped declarative overlays, sandboxed atomi
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-001, REQ-002, REQ-003, SEC-011]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
 
-`spine init` (human-only, ADR-012) creates the workspace, both repos, `.claude/`, `CLAUDE.md`,
+`spine-admin init` (human-only, ADR-012) creates the workspace, both repos, `.claude/`, `CLAUDE.md`,
 `.mcp.json`, `spine.yaml` and increment I01 (REQ-001), runs the official scaffolder and applies the
 profile contract (REQ-002); `nextjs-static` must build and test green immediately (REQ-003).
 Scaffolders execute npm code, so profiles must not become an injection vector.
@@ -69,7 +69,9 @@ Scaffolders execute npm code, so profiles must not become an injection vector.
 - **Harder:** whole-file replacement means code-file templates must track upstream scaffolder changes;
   `allowBuilds` and per-check network allowlists are maintained per profile; pnpm ≥ 10.26 and the
   version-capture step are hard requirements.
-- **Must now be true:** P07 builds `spine init` (sandboxed scaffolder, declarative overlay engine, atomic
-  temp-dir + 4-check gate, version capture into ADR-001) and the `nextjs-static` profile (overlay files,
-  smoke test, `.mcp.json`, direct-tool checks, `allowBuilds`); `code/CLAUDE.md` + `code/AGENTS.md` join
-  the write-protected set (ADR-012); the `new_dependency` gate guards `allowBuilds`.
+- **Must now be true:** the init phase builds `spine-admin init` (sandboxed scaffolder, declarative overlay
+  engine, atomic temp-dir + 4-check gate, version capture into ADR-001) and the `nextjs-static` profile
+  (overlay files, smoke test, `.mcp.json`, direct-tool checks, `allowBuilds`); `code/CLAUDE.md` +
+  `code/AGENTS.md` join the write-protected set (ADR-012); the `new_dependency` gate guards `allowBuilds`.
+  Phases: see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** `spine init` → `spine-admin init`; phase numbers removed.

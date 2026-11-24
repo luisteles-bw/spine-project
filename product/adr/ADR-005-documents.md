@@ -5,11 +5,11 @@ title: Documents — yaml (1.2) parsing, line-scan headings, per-command id inde
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-020, REQ-021, SEC-008]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -61,5 +61,7 @@ JS engine `eval`s `---js` frontmatter — unacceptable when docs carry client te
   required-heading registry must track the schemas; remember `version` is an integer and sorting is
   code-unit.
 - **Must now be true:** Topic 6 treats `events.jsonl` as the sole source of truth and `graph.json` as a
-  derived projection never read back for decisions; P02 builds the parser, splitter, heading
-  registry/scanner and id index; `.gitattributes eol=lf` lands in P01.
+  derived projection never read back for decisions; the schemas/documents phase builds the parser,
+  splitter, heading registry/scanner and id index; `.gitattributes eol=lf` lands with the repo setup.
+  Phases: see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** phase numbers removed.

@@ -5,11 +5,11 @@ title: Checks & secrets — sandbox-runtime containment, direct tool invocation,
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-040, REQ-041, SEC-005, SEC-006]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -69,6 +69,7 @@ must contain the project code a check runs. Targets macOS and Linux, Windows via
   deviation from the spec's "runs pnpm scripts").
 - **Must now be true:** `new_dependency` gate for `@anthropic-ai/sandbox-runtime`; profiles declare each
   check's direct tool argv + network allowlist + secret map; coder task templates default-forbid the
-  check configs; P06 builds the check runner (sandbox wrap, injection, sweep, redaction, Vitest JSON,
-  keychain adapter + WSL fallback) and the keychain-unreadable test; the human adds the `security` /
-  `secret-tool` Bash denies (Topic 12).
+  check configs; the checks/secrets phase builds the check runner (sandbox wrap, injection, sweep,
+  redaction, Vitest JSON, keychain adapter + WSL fallback) and the keychain-unreadable test; the human
+  adds the `security` / `secret-tool` Bash denies (plan table). Phases: see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** phase numbers removed; visibility → internal.

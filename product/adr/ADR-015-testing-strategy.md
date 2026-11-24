@@ -5,11 +5,11 @@ title: Testing strategy — four layers, PATH-level gh stub, stateful Twenty fak
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-082, REQ-010, REQ-071, REQ-083]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -76,8 +76,9 @@ strategy and the determinism controls.
 - **Harder:** maintain the on-PATH `gh` stub + recorded JSON, the stateful Twenty fake, and the
   fixture-version guard; keep events path-relative and git fully isolated.
 - **Must now be true:** every phase's tests follow the four layers; events carry workspace-relative paths
-  (P03); the e2e harness (bare remote, PATH `gh` stub, git-isolation env) lands with the build loop
-  (P06/P07); the Twenty stateful fake + `pnpm test:twenty` land in P08; the CI matrix is
-  macOS + Linux / Node 24 and runs under the sandbox with network denied (P01); the quality stage (P10)
-  runs the red-team bypass checklist and saves the record; `fast-check` is an optional reducer property
-  test (gate).
+  (core phase); the e2e harness (bare remote, PATH `gh` stub, git-isolation env) lands with the git/PR and
+  init phases; the Twenty stateful fake + `pnpm test:twenty` land in the Twenty phase; the CI matrix is
+  macOS + Linux / Node 24 and runs under the sandbox with network denied (from the toolchain phase); the
+  quality stage runs the red-team bypass checklist and saves the record; `fast-check` is an optional
+  reducer property test (gate). Phases: see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** phase numbers removed; visibility → internal.

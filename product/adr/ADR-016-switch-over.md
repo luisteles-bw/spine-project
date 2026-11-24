@@ -5,11 +5,11 @@ title: Switch-over — genesis-event import, dry-run + re-confirmed approvals, r
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-035, REQ-050, SEC-002]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -65,6 +65,8 @@ stay reversible until it is proven.
   the ordered checklist (migrate → import → settings → restart → red-team → archive) must be followed;
   a lint check must scan agent docs for stale `STATE.md` instructions.
 - **Must now be true:** this is the **switch-over task** in the plan (after `status`/`next`/`submit`/
-  `approve` work, ~P04); `spine-admin import --dry-run` + the projection comparator ship with it; the
+  `approve` work); `spine-admin import --dry-run` + the projection comparator ship with it; the
   `/approve`·`/reject` stubs, `STATE.bootstrap.md` archival and the "no STATE.md in agent docs" check
-  land at switch-over; rollback stays available until the first post-switch phase merges.
+  land at switch-over; rollback stays available until the first post-switch phase merges. Phases: see
+  `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** phase number removed.

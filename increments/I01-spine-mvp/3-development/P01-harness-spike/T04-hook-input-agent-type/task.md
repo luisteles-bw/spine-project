@@ -17,6 +17,7 @@ tdd: false
 criteria:
   - { id: AC-1, check: manual, text: "When a subagent makes a tool call, the PreToolUse hook input JSON includes an agent_type identifying the subagent" }
   - { id: AC-2, check: manual, text: "A main-session tool call has no agent_type (or a documented sentinel), so the guard can map 'no agent_type' to the main-session policy and unknown types to read-only" }
+  - { id: AC-3, check: manual, text: "Under `sandbox.network: none`, an agent Bash command needing the network is blocked without an interactive per-domain prompt; if Claude Code still prompts, record whether a hard deny is possible (D2 depends on this)" }
 billing: none
 visibility: internal
 author: architect

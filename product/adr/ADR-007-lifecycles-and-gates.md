@@ -5,11 +5,11 @@ title: Lifecycles & gates — typed transition tables, event-backed states, conf
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-011, REQ-010, REQ-082, REQ-014, SEC-002]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -44,7 +44,7 @@ without becoming a way for an agent to weaken the process (SEC-002). The retry l
   changes afterwards, the approval no longer counts and the **gate reopens**.
 - `phase_pr` is satisfied by **GitHub-merge detection**: its event records the PR number, base branch
   and merge SHA; a PR closed without merging never satisfies it. All other gates go through
-  `spine approve`.
+  `spine-admin approve`.
 
 ### Increment stages — fixed order in code, track omits only
 - The six stages and their order live in **code**. A track may **omit** stages but never reorder or add
@@ -64,7 +64,8 @@ without becoming a way for an agent to weaken the process (SEC-002). The retry l
 - **Harder:** guards must be named pure functions and the per-machine tables maintained; config must be
   snapshotted at increment creation and the reducer must never read live `spine.yaml`; `spine.yaml`
   must be write-protected like state.
-- **Must now be true:** P03 builds the tables, reducer, guards, the full-product transition tests and
-  the replay-stability test; the increment-creation event carries the track/gates/limits snapshot;
-  `phase_pr` detection (PR #, base, merge SHA) is wired in the git/PR work (P06); `spine.yaml` joins the
-  ADR-006 write-protection set.
+- **Must now be true:** the tables, reducer, guards, the full-product transition tests and the
+  replay-stability test are built in the core phase; the increment-creation event carries the
+  track/gates/limits snapshot; `phase_pr` detection (PR #, base, merge SHA) is wired in the git/PR work;
+  `spine.yaml` joins the ADR-006 write-protection set. Phases: see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** `spine approve` → `spine-admin approve`; phase numbers removed.

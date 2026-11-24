@@ -5,11 +5,11 @@ title: Guard hook — one global agent_type-keyed hook, active.json, allowlist t
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-051, REQ-052, SEC-004, SEC-001]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -33,16 +33,27 @@ REQ-052).
 - **Every tool is matched;** a tool the guard doesn't recognise is **denied for scoped roles** (a new
   Claude Code tool can't slip past). Scope matching uses **realpath**, so a symlink inside the scope
   can't point outside it.
+- **Main-session policy** (no `agent_type`): may run `spine` (not `spine-admin`), read, and the
+  dispatch / docs-MCP tools; may **not** write `code/**` or `project/state/**` (only scoped roles write
+  code; only the spine writes state).
+- **Scoped writes require `agent_type == active.json.role`** — a mismatch (stale/mismatched subagent) is
+  denied — and **one scoped role is active at a time** (one checkout, one task; no parallel subagents in
+  the MVP).
+- **Per-role tool allowlist** (so "unknown tools denied" doesn't block legitimate MCP): coder/tester may
+  use the docs MCPs (Context7, next-devtools) **read-only**; verifier/security read-only tools; the
+  architect may use WebSearch/WebFetch (ask). Anything else is denied for scoped roles.
 
 ### Bash inspection — per-role allowlist of shapes (a tripwire)
 - The tokenizer feeds a **per-role allowlist of command shapes**, not a denylist. Scoped roles (tester,
   coder, verifier) may run their **check commands + read-only tools**, nothing else.
-- **Denied:** `$(…)`, backticks, `eval`, `-c`/`-e` interpreters, any redirection to a file, and anything
-  the tokenizer can't parse. File writes go **only** through Edit/Write (where scope is checked);
-  otherwise `echo > file` would bypass `scope.touch`.
+- **Denied:** `$(…)`, backticks, `eval`, `-c`/`-e` interpreters, any redirection to a file,
+  snapshot-update flags (`vitest -u` / `--update`), and anything the tokenizer can't parse. File writes
+  go **only** through Edit/Write (where scope is checked); otherwise `echo > file` would bypass
+  `scope.touch`.
 - This layer is a **tripwire, not a wall.** The real controls are the **sandbox** and **spine's submit
-  checks**: the diff against scope (ADR-009) and the **test-file hashes recorded at "Tests ready"**,
-  which also catch tests rewritten while `pnpm test` runs — something the guard can never see.
+  checks**: the diff against scope (ADR-009) and the **test-file hashes recorded at "Tests ready"**
+  (covering test files, snapshots and fixtures), which also catch tests or snapshots rewritten while
+  `pnpm test` runs — something the guard can never see.
 
 ### Fail mode — fail closed, exit-2 aware
 - Claude Code blocks a tool **only on exit code 2**; any other non-zero is non-blocking (fails open). So
@@ -64,8 +75,13 @@ REQ-052).
 - **Harder:** the role model depends on Claude Code's `agent_type` in hook input (verify against current
   docs); the `|| exit 2` wrapper and the self-deadline are easy to get wrong; `~/.claude/**` denies and
   the guard-bin path are more human-applied settings.
-- **Must now be true:** P05 builds the guard bin (agent_type role, `active.json` reader, realpath scope
-  match, per-role shape allowlist, self-deadline, `|| exit 2`); P03/P04 write `active.json` inside the
-  state lock with the event `seq` and record test-file hashes at "Tests ready"; submit enforces the scope
-  diff + test-file-hash checks (ADR-009); the human installs the global hook and the `~/.claude/**`
-  denies (Topic 12).
+- **Must now be true:** the guard bin is built in the guard phase (agent_type role, `active.json` reader,
+  realpath scope match, per-role shape + tool allowlist, one-role-at-a-time, self-deadline, `|| exit 2`);
+  the CLI-write phase writes `active.json` inside the state lock with the event `seq` and records
+  test-file + snapshot + fixture hashes at "Tests ready"; submit enforces the scope diff + hash checks
+  (ADR-009); the human installs the global hook (after `spine-guard` exists) and the `~/.claude/**` denies
+  (plan table). Phases: see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** added the main-session policy, `agent_type == active.json.role` for scoped
+  writes, one-scoped-role-at-a-time, and a per-role MCP tool allowlist; the shape allowlist forbids
+  `vitest -u/--update` and testFiles covers snapshots + fixtures; phase numbers removed; visibility →
+  internal.

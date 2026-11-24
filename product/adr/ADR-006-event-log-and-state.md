@@ -5,11 +5,11 @@ title: Event log & state — seq-indexed JSONL source of truth, derived graph.js
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-010, SEC-002, SEC-012, SEC-003]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -29,8 +29,9 @@ here. The integrity model assumes "only the spine writes state" (SEC-002) — wh
   as a corrupt interior line.
 - `type` is **additive-only** (like ADR-004): an existing type never changes meaning; a new meaning
   gets a new type, so the reducer can replay any old log.
-- `ts` comes from the **injected clock**; `actor` is set by the spine from agent-shell detection
-  (Topic 12), **never from a flag**. Gate decisions are events carrying who / when / note (SEC-003).
+- `ts` comes from the **injected clock**. `actor` is set by the **writing binary**, not by detection or a
+  flag: `spine-admin` ⇒ `human`; `spine` ⇒ the active role from `active.json` (`main` if none); imported
+  events ⇒ `source: bootstrap-import`. Gate decisions are events carrying who / when / note (SEC-003).
 
 ### Derived graph.json
 - Pure reducer `(events) → graph`; deterministic serialization (sorted keys, 2-space indent, trailing
@@ -46,21 +47,13 @@ here. The integrity model assumes "only the spine writes state" (SEC-002) — wh
 - Log integrity otherwise rests on "only the spine writes state" + the `project/` git history (a commit
   per transition, a second audit trail). No event hash chain in the MVP (optional later hardening).
 
-### Enforcing "only the spine writes state" (SEC-002) — human-applied settings
-The sandbox auto-allows sandboxed Bash writes today, so these `.claude/settings.json` / sandbox
-changes are applied **by the human** (agents cannot edit `.claude/`), at the **switch-over**, once the
-spine owns `STATE.md` and the event log:
-1. `sandbox.filesystem.denyWrite` plus `Edit`/`Write` deny rules for the event-log directory,
-   `STATE.md` (once generated) and `project/.git`, so only the spine commits to `project/`.
-2. `excludedCommands: ["spine *"]`, so the spine is the one process that may write there.
-3. Human-only subcommands also get Bash deny rules (details in Topic 12).
-4. `allowUnsandboxedCommands: false`, so a blocked write can't be retried unsandboxed through a
-   reflex-approved prompt.
-5. The spine runs **outside** the sandbox and therefore never spawns project code; tests and builds
-   stay sandboxed (Topic 11).
-
-Verify the exact setting keys against the current Claude Code docs when written — the brief flags that
-these formats change.
+### Enforcing "only the spine writes state" (SEC-002)
+The guarantee rests on human-applied settings — sandbox `denyWrite` over `project/state/**` and git,
+`excludedCommands: ["spine *"]`, `allowUnsandboxedCommands: false` and `failIfUnavailable: true`. The
+**single source** for these and their timing (baseline vs switch-over) is **ADR-012 and the plan's
+"Human-applied settings" table**; they are not restated here. The spine runs **outside** the sandbox and
+never executes project code for this (SEC-016). The `project/state/` layout (committed vs gitignored) is
+in `architecture.md`; the glob `project/state/**` is entirely under `denyWrite` at switch-over.
 
 ### Single-writer locking
 - Hand-rolled **`O_EXCL`** lockfile (pid + timestamp) in the fs adapter.
@@ -88,7 +81,10 @@ these formats change.
   guarantee depends on human-applied settings that must be verified against current Claude Code docs;
   write-once records mean all mutable status lives in events — the reducer, not the file, is
   authoritative.
-- **Must now be true:** clock and ids are injected ports (ADR-001); Topic 11 keeps tests/builds
-  sandboxed while the spine runs outside; Topic 12 consolidates settings.json + agent-shell detection;
-  P03 builds the log, reducer, lock and recovery as pure core + a thin fs adapter with heavy tests
-  (REQ-010 and every transition); the human applies the SEC-002 hardening at switch-over.
+- **Must now be true:** clock and ids are injected ports (ADR-001); checks stay sandboxed while the spine
+  runs outside (ADR-011); settings live in ADR-012 + the plan table; the log, reducer, lock and recovery
+  are built as pure core + a thin fs adapter with heavy tests (REQ-010 and every transition); the human
+  applies the SEC-002 hardening at switch-over. Phases: see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** `actor` is defined by the writing binary (not agent-shell detection, ADR-012);
+  the settings-enforcement list now points to ADR-012 + the plan table; phase numbers removed; visibility
+  → internal.

@@ -5,11 +5,11 @@ title: Twenty app & sync — SDK-defined model, one-way REST outbox keyed on spi
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-070, REQ-071, SEC-013, SEC-008]
 visibility: client
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -17,7 +17,7 @@ updated: 2026-11-22
 A Twenty app defines the custom objects, fields and views from `taxonomy.json` (REQ-070); `spine sync`
 upserts **one way** by spine id, idempotently, with no duplicates (REQ-071); only whitelisted fields
 and `visibility`-allowed docs are sent (SEC-013); anything read back from Twenty is untrusted (SEC-008).
-Twenty is built last (P08) and only reads what the spine produces.
+Twenty is built late (its own phase) and only reads what the spine produces.
 
 ## Decision
 
@@ -27,7 +27,7 @@ Twenty is built last (P08) and only reads what the spine produces.
   sync enforces the declared state** (REQ-070). The brief's "SDK is young" risk predates 2.0; a
   hand-written metadata applier would just rebuild what the SDK now gives.
 - **Conditions:** pin the **Twenty Docker image and `twenty-sdk` versions together** (upgrade
-  deliberately); **generate the SDK definitions from `taxonomy.json`** (one source); **P08 opens with a
+  deliberately); **generate the SDK definitions from `taxonomy.json`** (one source); **the Twenty phase opens with a
   half-day spike** — one object, one field on Opportunity, one relation, one view, synced twice to a
   fresh local Twenty — and falls back to the **metadata API only if the spike fails**.
 - Model changes are **additive-only** (like ADR-004); removing a field may drop its data on the next
@@ -58,10 +58,11 @@ Twenty is built last (P08) and only reads what the spine produces.
 - **Easier:** the SDK enforces declared state (no drift); `spineId` + lookup-before-create makes sync
   robust to cache loss and manual edits; the outbox decouples sync from transitions; the ownership split
   avoids clobbering human-curated CRM data.
-- **Harder:** Twenty image + SDK versions must move together; the P08 spike is a go/no-go on the SDK;
-  additive-only model with CR-gated removals; Markdown rich-text rendering needs checking.
-- **Must now be true:** `taxonomy.json` generates the SDK definitions; P08 runs the spike first, then
-  builds the app (objects/fields/views/relations), a `spineId` on every owned object, the REST sync
-  client (outbox by `seq`, lookup-before-create, throttle/backoff) and `crm-ids.json` as cache; Twenty
-  reads are labelled untrusted; the Twenty API key is a keychain entry; a field removal needs a backup +
-  CR.
+- **Harder:** Twenty image + SDK versions must move together; the Twenty-phase spike is a go/no-go on the
+  SDK; additive-only model with CR-gated removals; Markdown rich-text rendering needs checking.
+- **Must now be true:** `taxonomy.json` generates the SDK definitions; the Twenty phase runs the spike
+  first, then builds the app (objects/fields/views/relations), a `spineId` on every owned object, the REST
+  sync client (outbox by `seq`, lookup-before-create, throttle/backoff) and `crm-ids.json` as cache;
+  Twenty reads are labelled untrusted; the Twenty API key is a keychain entry; a field removal needs a
+  backup + CR. Phases: see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** phase numbers removed (Twenty phase is P12 in the plan).

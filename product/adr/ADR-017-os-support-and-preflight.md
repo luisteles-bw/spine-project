@@ -5,11 +5,11 @@ title: OS support & preflight — macOS tier 1, Linux/WSL2 tier 2, per-command p
 stage: architecture
 status: accepted
 superseded_by:
-version: 1
+version: 2
 refs: [REQ-083, SEC-007]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 ## Context
@@ -41,7 +41,14 @@ environment — including the spine's own hardening (SEC-007) — must be checke
 - The **guard never runs preflight** (ADR-010: it never spawns processes).
 - **`spine doctor`** prints the full report **and audits the hardening**: the workspace settings match the
   package template; `sandbox.enabled`, `failIfUnavailable` and `allowUnsandboxedCommands: false` are set;
-  the guard hook is present; and **no `settings.local.json` or user-level setting weakens them**.
+  the agent `sandbox.network` is `none` (D2); the guard hook is present; and **no `settings.local.json` or
+  user-level setting weakens them**.
+- **`spine` resolution (SEC-020):** preflight / `spine doctor` verify `spine` resolves to the **installed
+  package outside the workspace** and that `PATH` has **no relative or workspace entries** — so a shell
+  alias or a workspace `PATH` entry can't shadow the excluded `spine`.
+- **Linux/WSL2 sandbox dependency:** preflight detects when **bubblewrap can't create a user namespace**
+  (e.g. Ubuntu 24.04's AppArmor `userns` restriction) and prints the remediation; the CI "sandbox +
+  network-denied" job verifies this on the actual runner.
 - **After switch-over, state-changing commands refuse to run (exit 3) if the sandbox or the guard hook is
   off** — the spine won't mutate state unless its own protections are active.
 
@@ -52,7 +59,10 @@ environment — including the spine's own hardening (SEC-007) — must be checke
   switch-over.
 - **Harder:** per-command tool declarations must be maintained; `spine doctor` must know the expected
   settings template and detect weakening overrides; the WSL2 path/version checks add preflight logic.
-- **Must now be true:** P01 builds the preflight framework (per-command tool needs, exit 3 + remediation)
-  and `spine doctor` (including the hardening self-check); the WSL2 guards (`/mnt/*`, WSL1, filesystem)
-  live in preflight; the "refuse state changes if unprotected" check lands with the switch-over (P04);
-  the tier-1-only security claim is documented in `security.md`.
+- **Must now be true:** the preflight framework (per-command tool needs, exit 3 + remediation) and
+  `spine doctor` (hardening self-check, `spine`-resolution/PATH check, bwrap/userns detection) are built in
+  the toolchain phase; the WSL2 guards (`/mnt/*`, WSL1, filesystem) live in preflight; the "refuse state
+  changes if unprotected" check lands with the switch-over; the tier-1-only security claim is in
+  `security.md`. Phases: see `I01-PLAN`'s ADR→phase table.
+- **Amended 2026-11-23:** added the `spine`-resolution/PATH check (SEC-020) and the Linux bwrap/userns
+  detection + CI verification; phase numbers removed; visibility → internal.

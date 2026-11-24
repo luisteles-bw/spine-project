@@ -6,39 +6,42 @@ increment: I01
 stage: development
 parent: I01-PLAN
 status: draft
-version: 1
-refs: [SECURITY, ADR-006, ADR-009, ADR-010, ADR-012]
+version: 2
+refs: [SECURITY, ADR-006, ADR-009, ADR-010, ADR-011, ADR-012, ADR-017]
 branch: phase/P01-harness-spike
 billing: none
-estimate_h: 4
+estimate_h: 6
 visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-24
 ---
 
 ## Goal
 
-Prove, in a real Claude Code session on macOS (tier 1), the four harness behaviours the spine's
-security model rests on — **before** any of it is built. If a probe fails, the affected ADRs are
-re-planned (via CR) before P02 starts, so nothing is built on a false assumption.
+Prove, in a real Claude Code session on macOS (tier 1), the harness behaviours the spine's security
+model rests on — **before** any of it is built. Run the probes in a **throwaway workspace** wired with
+the **full switch-over settings** (not today's bootstrap settings), so we test the hardened config we
+will actually ship. If a probe fails, the affected ADR(s) are re-planned (via CR) before P02 starts.
 
 ## Scope
-- In: throwaway **fixture** `settings.json`, small probe scripts and stub binaries, and a findings
-  record with a go/no-go.
-- Out: any spine or product code (P02+); changing the real workspace `settings.json`; Linux/WSL
-  verification (tier 2, deferred).
+- In: a throwaway workspace with the **full switch-over `settings.json`**; small probe scripts and stub
+  binaries (`spine`, `spine-admin`, a guard); a findings record with a go/no-go.
+- Out: any spine or product code (later phases); changing the real workspace `settings.json`; full
+  Linux/WSL verification (tier 2 — note the bwrap/userns check, defer).
 
 ## Tasks
 | Task | Title | Size | Est. h | Depends on |
 | --- | --- | --- | --- | --- |
-| P01-T01 | Sandbox `denyWrite` blocks a Bash append | S | 1 | none |
-| P01-T02 | `excludedCommands` — excluded writes, non-excluded blocked | S | 1 | P01-T01 |
-| P01-T03 | PreToolUse **exit 2** blocks (exit 1 does not) | S | 0.5 | none |
-| P01-T04 | Hook input carries **`agent_type`** for subagents | S | 0.5 | none |
-| P01-T05 | Findings record + go/no-go | S | 1 | P01-T01..T04 |
+| P01-T01 | `denyWrite` blocks a Bash append; nested `.env` read + credential masking | S | 1 | none |
+| P01-T02 | `excludedCommands`: excluded `spine` writes, non-excluded `spine-admin` blocked | S | 1 | P01-T01 |
+| P01-T03 | PreToolUse **exit 2** blocks (exit 1 doesn't); missing guard behind `\|\| exit 2` blocks | S | 1 | none |
+| P01-T04 | Hook input carries **`agent_type`**; `sandbox.network: none` prompt behaviour | S | 1 | none |
+| P01-T05 | `spine` resolution (alias / PATH shadow) + every settings key exists in the installed CC | S | 1 | none |
+| P01-T06 | Findings record + go/no-go | S | 1 | P01-T01..T05 |
 
 ## Exit criteria
-- [ ] All tasks Done, every manual criterion observed and recorded
+- [ ] All tasks Done, every manual criterion observed in a throwaway workspace under the **full
+      switch-over settings**, and recorded
 - [ ] `review.md` passed (checks and security)
 - [ ] Findings record states the Claude Code version and a clear **go/no-go**
 - [ ] If any probe failed, a CR re-planning the affected ADR(s) is raised before P02

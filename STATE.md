@@ -45,3 +45,4 @@
 - 2026-11-22: Workspace bootstrapped from spec v0.4. Discovery closed; architecture ready to start.
 - 2026-11-22: Architecture session S01 opened. Working the 17-topic agenda from the brief; Topic 1 (packaging) under discussion.
 - 2026-11-22: Architecture session S01 closed. 17 topics decided (ADR-001…ADR-017); `architecture.md`, `plan.md` and P01 (phase + 5 tasks) written; `security.md` & `conventions.md` bumped to v2. Open gate: **stage_exit + plan**.
+- 2026-11-24: Pre-gate review pass — applied 32 findings + 6 decisions (D1–D6). Plan split to **15 phases** (v2; ADR→phase table, settings table, parallel human track); `security.md` v3, `requirements.md` v2, `architecture.md` v2; `spec-errata.md` added; **all 17 ADRs amended** (phase numbers removed; ADR-006/009/010/011/012/015/017 → internal); P01 spike expanded to **6 probes**. Gate unchanged: **stage_exit + plan**.
