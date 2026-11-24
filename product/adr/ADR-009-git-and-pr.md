@@ -5,11 +5,11 @@ title: Git & PR automation — real git via arg arrays, hook-proof, gh CLI, tamp
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
-refs: [REQ-042, REQ-043, SEC-009, SEC-002]
+version: 3
+refs: [REQ-042, REQ-043, SEC-009, SEC-002, SEC-016]
 visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -39,8 +39,9 @@ and the spine must never build shell strings (SEC-009).
 - **Floor:** git ≥ 2.32 (for `--trailer`); check at startup, exit 3 if older.
 
 ### PR + merge detection — gh CLI (argument arrays)
-- `gh` reuses `gh auth` from the keychain (no token handling, security.md): `gh pr create` opens the PR,
-  `gh pr view --json state,mergedAt,mergeCommit` reads state.
+- `gh` reuses `gh auth` from the keychain (no token handling, security.md): `gh pr create` opens the
+  PR with a **generated body** (tasks, criteria, checks, security verdict and manual criteria —
+  REQ-043) passed via `--body-file`; `gh pr view --json state,mergedAt,mergeCommit` reads state.
 - **Permission model:** Claude Code's rules only see `spine …`, so git/gh the spine runs internally
   bypass the normal `gh`/push ask rules. Therefore the **`spine pr` subcommand itself goes in `ask`**;
   read-only status subcommands stay allowed.
@@ -62,9 +63,10 @@ and the spine must never build shell strings (SEC-009).
 - **Easier:** real-git fidelity in tests; injection-proof and hook-proof git; trailer-searchable history
   cross-linked to the log via `Spine-Seq`; a `phase_pr` gate that squash or post-review pushes can't
   fool.
-- **Harder:** we parse porcelain ourselves; repo setup disables squash/rebase (and, on Pro/Team, sets
-  branch protection); `spine pr` → `ask` (baseline) and `code/.git` → denyWrite (switch-over) are
-  human-applied settings (plan table); git ≥ 2.32 is a hard floor.
+- **Harder:** we parse porcelain ourselves; `spine init` code (P11) disables squash/rebase merges and
+  (on Pro/Team) sets branch protection; git ≥ 2.32 is a hard floor. Two settings remain
+  human-applied (plan table): `spine pr` → `ask` (baseline) and `code/.git` → denyWrite
+  (switch-over).
 - **Must now be true:** the git + gh adapters are built in the git/PR phase (hooks disabled, explicit
   staging, `--trailer`, `Spine-Seq`, merge-base ancestry check, version floor); init disables
   squash/rebase and sets merge-commit-only (branch protection only on Pro/Team); `spine pr` is in `ask`
