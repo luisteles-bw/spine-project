@@ -6,17 +6,20 @@ increment: I01
 stage: architecture
 parent: I01
 status: draft
-version: 2
-refs: [REQUIREMENTS, SECURITY, ARCH, ADR-001, ADR-009, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015, ADR-016, ADR-017]
+version: 3
+refs: [REQUIREMENTS, SECURITY, ARCH, ADR-001, ADR-009, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015, ADR-016, ADR-017, ADR-018]
 visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 > **v2 (2026-11-23), pre-gate review.** Split old P05 (CLI) and P06 (checks+git) so no phase breaks the
 > spine's own ≤ 8-task / ≤ 24-h limits; renumbered to 15 phases. Added the ADR→phase table (phase numbers
 > now live here, not in the ADRs), the parallel human track, the STATE.md-renderer assignment, and the
 > network / dependency-install / `project/` backup decisions (D1–D6).
+>
+> **v3 (2026-11-24):** wired in independent design reviews (ADR-018) — REQ-090 → P06, REQ-091 → P09, a
+> bootstrap settings row, and coverage.
 
 ## Phases
 
@@ -30,10 +33,10 @@ Billing is `none` for every phase (the spine builds itself). Limits: ≤ 8 tasks
 | **P03** | development | Zod schemas (discriminated union) + committed JSON Schema + Ajv contract test; `yaml` parser + splitter; heading scanner + registry; id index (line ranges) + ref resolution | P02 | 20 | **Must** | REQ-020/021/022 |
 | **P04** | development | **Pure core**: event log (seq, hashes, `O_EXCL` lock, recovery), reducer + transition tables + guards, graph projection, replay-stability + full state×event tests | P03 | 22 | **Must** | REQ-010/011/014/023/082 |
 | **P05** | development | **CLI read side**: commander routing + envelope + exit table + renderer; `status`, `next`, `context` (budget + plan-time check), `session`, `doctor` | P04 | 16 | **Must** | REQ-024/030/031/034 |
-| **P06** | development | **CLI write side**: `submit` (DoD: validate + scope-diff + test-hashes), `plan apply` (DoR, limits, split), `cr raise`, `active.json` writer (inside the state lock) | P05 | 16 | **Must** | REQ-016/032/033/060, REQ-015 (split) |
+| **P06** | development | **CLI write side**: `submit` (DoD: validate + scope-diff + test-hashes), `plan apply` (DoR, limits, split), `cr raise`, `active.json` writer (inside the state lock) | P05 | 16 | **Must** | REQ-016/032/033/060, REQ-015 (split), REQ-090 |
 | **P07** | development | **Checks & secrets**: sandbox-runtime runner, per-check secret inject + layered redaction + post-check sweep, keychain adapter (+ WSL fallback), `check --trace` | P06 | 18 | **Must** | REQ-040/041/025, SEC-005/006/011/012 |
 | **P08** | development | **Git & PR**: git adapter (hooks-off, `--trailer`, `Spine-Seq`, scoped staging), `gh` adapter, tamper-proof `phase_pr` (SHA + ancestry) | P07 | 16 | **Must** | REQ-042/043, SEC-009 |
-| **P09** | development | **Guard & Claude assets**: `spine-guard` bin + one global `agent_type` hook; the five agents + slash commands; settings model finalised | P08 | 20 | **Must** | REQ-050/051/052, SEC-004/008 |
+| **P09** | development | **Guard & Claude assets**: `spine-guard` bin + one global `agent_type` hook; the five agents + slash commands; settings model finalised | P08 | 20 | **Must** | REQ-050/051/052/091, SEC-004/008 |
 | **P10** | development | **`spine-admin` + switch-over**: approve/reject/phase cut/repair/upgrade/import; CR decide; switch-over (import `--dry-run` + projection match, phase-2 settings, guard hook); **renders the generated `STATE.md`** | P09 | 20 | **Must** | REQ-012/013/035, SEC-001/002/003 |
 | **P11** | development | **`init` + `nextjs-static`**: `spine-admin init` (+ both repos, `.claude`, `CLAUDE.md`, `.mcp.json`, `spine.yaml`, I01); overlay engine; sandboxed atomic scaffolder; the profile | P06–P10 | 22 | **Must** | REQ-001/002/003/004 |
 | **P12** | development | Twenty 2.0 app (spike-first) + one-way REST `sync` (outbox, `spineId`, cache) | P10 | 20 | Must (after milestone) | REQ-070/071 |
@@ -109,6 +112,8 @@ spine in as phases land — see the parallel human track and the client bootstra
 | REQ-061, REQ-062, REQ-063, REQ-064 | P13 |
 | REQ-070, REQ-071 | P12 |
 | REQ-080, REQ-081, REQ-083, REQ-084 | P02 |
+| REQ-090 | P06 |
+| REQ-091 | P09 |
 
 ## Human-applied settings — by phase (one place, so none are lost)
 
@@ -119,6 +124,7 @@ and the excluded `spine` makes its own `gh`/Twenty calls.
 
 | When | Setting / action | Why | ADR / D |
 | --- | --- | --- | --- |
+| **Bootstrap (now)** | copy `design-reviewer` and the three `review-*` commands into `.claude/` | the architecture stage's independent reviews (ADR-018) run via these | 018 |
 | **Baseline (P02)** | `sandbox.enabled: true`, `allowUnsandboxedCommands: false`, **`failIfUnavailable: true`** | A missing sandbox must fail, not silently void every `denyWrite` | 006, 012 |
 | Baseline (P02) | `excludedCommands: ["spine *"]` | Only the main `spine` runs unsandboxed to write state | 006, 012 |
 | Baseline (P02) | **`sandbox.network`: none for all roles (Bash)** | Agent Bash gets no network; only `pnpm install` is affected and that's human-run (D6) | D2, 011 |

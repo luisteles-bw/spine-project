@@ -5,11 +5,11 @@ title: Schemas — Zod-first, dates as strings, discriminated unions, additive-o
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-020, REQ-031, REQ-023]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -67,3 +67,4 @@ schemas evolve.
   one-time migration of the bootstrap docs' frontmatter runs before switch-over (a plan item). Phases:
   see `I01-PLAN`'s ADR→phase table.
 - **Amended 2026-11-23:** phase numbers removed.
+- **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).

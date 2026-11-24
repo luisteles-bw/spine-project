@@ -5,11 +5,11 @@ title: Profiles & init — package-shipped declarative overlays, sandboxed atomi
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-001, REQ-002, REQ-003, SEC-011]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -75,3 +75,4 @@ Scaffolders execute npm code, so profiles must not become an injection vector.
   `code/AGENTS.md` join the write-protected set (ADR-012); the `new_dependency` gate guards `allowBuilds`.
   Phases: see `I01-PLAN`'s ADR→phase table.
 - **Amended 2026-11-23:** `spine init` → `spine-admin init`; phase numbers removed.
+- **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).

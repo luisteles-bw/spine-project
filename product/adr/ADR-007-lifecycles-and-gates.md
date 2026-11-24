@@ -5,11 +5,11 @@ title: Lifecycles & gates — typed transition tables, event-backed states, conf
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-011, REQ-010, REQ-082, REQ-014, SEC-002]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -69,3 +69,4 @@ without becoming a way for an agent to weaken the process (SEC-002). The retry l
   track/gates/limits snapshot; `phase_pr` detection (PR #, base, merge SHA) is wired in the git/PR work;
   `spine.yaml` joins the ADR-006 write-protection set. Phases: see `I01-PLAN`'s ADR→phase table.
 - **Amended 2026-11-23:** `spine approve` → `spine-admin approve`; phase numbers removed.
+- **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).

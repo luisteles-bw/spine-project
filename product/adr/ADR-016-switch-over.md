@@ -5,11 +5,11 @@ title: Switch-over — genesis-event import, dry-run + re-confirmed approvals, r
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-035, REQ-050, SEC-002]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -70,3 +70,4 @@ stay reversible until it is proven.
   land at switch-over; rollback stays available until the first post-switch phase merges. Phases: see
   `I01-PLAN`'s ADR→phase table.
 - **Amended 2026-11-23:** phase number removed.
+- **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).

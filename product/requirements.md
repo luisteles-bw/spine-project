@@ -4,11 +4,11 @@ type: requirements
 title: Spine MVP requirements
 stage: discovery
 status: approved
-version: 2
+version: 3
 refs: [SPEC, CONCEPT]
 visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 Derived from `SPEC` v0.4. Each requirement names the spec section it comes from. **Must** is
@@ -94,3 +94,9 @@ The Architect may refine wording and priority in the architecture stage (bump `v
 | REQ-082 | Every lifecycle transition has a unit test | The test suite enumerates the transition tables | Must | Build order |
 | REQ-083 | Works on macOS and Linux; Windows through WSL | CI runs on both macOS and Linux | Must | Decisions |
 | REQ-084 | Every command works offline except `sync` and `pr` | No network call outside those two | Should | Concept |
+
+## Design reviews
+| ID | Requirement | Acceptance (summary) | Priority | Spec section |
+| --- | --- | --- | --- | --- |
+| REQ-090 | The architecture `stage_exit` gate refuses unless, for the increment's tier, every topic has a `Tnn.questions.md`, a topic review and a recorded decision; every ADR has an adr review; the stage review exists; and every review finding has a Response. Tiers: S none; M topic + stage; L and the spine itself all three | The gate check names any missing review artifact or finding without a Response, and refuses | Should | ADR-018 |
+| REQ-091 | `spine-guard` enforces the design-reviewer's blind read scope: in topic mode it cannot read `topics/Tnn.architect.md` | A design-reviewer read of the Architect's recommendation in topic mode is blocked | Should | ADR-018 |

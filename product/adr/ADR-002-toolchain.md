@@ -5,11 +5,11 @@ title: Toolchain — Node 24 LTS, ESM, tsdown, ESLint + Prettier, tsx
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-080, REQ-082, REQ-083, REQ-010]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -55,3 +55,4 @@ must be enforceable by the linter.
   tsdown / tsx / eslint / prettier through `new_dependency` gates, and runs `pnpm spine` via `tsx`
   with the tsdown bundle as the stable artifact. Phases: see `I01-PLAN`'s ADR→phase table.
 - **Amended 2026-11-23:** phase numbers removed.
+- **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).

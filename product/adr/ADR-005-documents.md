@@ -5,11 +5,11 @@ title: Documents — yaml (1.2) parsing, line-scan headings, per-command id inde
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-020, REQ-021, SEC-008]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -65,3 +65,4 @@ JS engine `eval`s `---js` frontmatter — unacceptable when docs carry client te
   splitter, heading registry/scanner and id index; `.gitattributes eol=lf` lands with the repo setup.
   Phases: see `I01-PLAN`'s ADR→phase table.
 - **Amended 2026-11-23:** phase numbers removed.
+- **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).

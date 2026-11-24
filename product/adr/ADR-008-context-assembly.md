@@ -5,11 +5,11 @@ title: Context assembly — deterministic sliced path list, trust flags, plan-ti
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-024, REQ-031, SEC-008, REQ-033]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -61,3 +61,4 @@ REQ-033).
   includes the per-task context-size check; `spine.yaml` gains a `context` byte budget (~100 KB). Phases:
   see `I01-PLAN`'s ADR→phase table.
 - **Amended 2026-11-23:** phase numbers removed.
+- **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).

@@ -5,11 +5,11 @@ title: One workspace-ready package with a compile-isolated pure core
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-080, REQ-082, SEC-001]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -71,3 +71,4 @@ be weakened by the spine code you are currently editing.
   `spine-dev` alias; the guard phase wires the guard to the stable `spine` path. Phases: see `I01-PLAN`'s
   ADR→phase table.
 - **Amended 2026-11-23:** phase numbers removed.
+- **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).

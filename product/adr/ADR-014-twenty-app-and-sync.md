@@ -5,11 +5,11 @@ title: Twenty app & sync — SDK-defined model, one-way REST outbox keyed on spi
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-070, REQ-071, SEC-013, SEC-008]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -66,3 +66,4 @@ Twenty is built late (its own phase) and only reads what the spine produces.
   Twenty reads are labelled untrusted; the Twenty API key is a keychain entry; a field removal needs a
   backup + CR. Phases: see `I01-PLAN`'s ADR→phase table.
 - **Amended 2026-11-23:** phase numbers removed (Twenty phase is P12 in the plan).
+- **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).

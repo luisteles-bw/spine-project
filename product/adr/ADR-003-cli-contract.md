@@ -5,11 +5,11 @@ title: CLI contract — commander in routing-only mode, uniform JSON envelope, t
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-020, REQ-031, REQ-051]
-visibility: client
+visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -67,3 +67,4 @@ envelope schema.
   the guard phase; the `--json` contract test is part of the CLI phase. Phases: see `I01-PLAN`'s
   ADR→phase table.
 - **Amended 2026-11-23:** phase numbers removed.
+- **Amended 2026-11-24:** visibility → internal (every spine ADR is internal; ADR-018).
