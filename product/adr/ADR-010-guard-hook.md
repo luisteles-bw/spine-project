@@ -5,7 +5,7 @@ title: Guard hook — one global agent_type-keyed hook, active.json, allowlist t
 stage: architecture
 status: accepted
 superseded_by:
-version: 4
+version: 5
 refs: [REQ-051, REQ-052, SEC-004, SEC-001]
 visibility: internal
 author: architect
@@ -37,17 +37,21 @@ REQ-052).
   Claude Code tool can't slip past). Scope matching uses **realpath**, so a symlink inside the scope
   can't point outside it.
 - **Main-session policy** (no `agent_type`, no scoped role active): may run `spine` (not `spine-admin`),
-  read, and the dispatch / docs-MCP tools; may **not** write `code/**` or `project/state/**` (only
-  scoped roles write code; only the spine writes state).
+  read, the dispatch / docs-MCP tools, and **`WebFetch`, `WebSearch` and the Context7 tools
+  (`mcp__context7__*`)**; may **not** write `code/**` or `project/state/**` (only scoped roles write
+  code; only the spine writes state).
 - **One unified deny rule for scoped writes:** `agent_type` must equal `active.json.role`; absent
   **or** mismatched `agent_type` while a scoped role is active is **denied** (stale/mismatched
   subagent, or identity lost per CC #90662). **One scoped role is active at a time** (one checkout,
   one task; no parallel subagents in the MVP).
 - **Per-role tool allowlist** (so "unknown tools denied" doesn't block legitimate MCP): coder/tester may
-  use the docs MCPs (Context7, next-devtools) **read-only**; verifier/security read-only tools; the
-  architect may use WebSearch/WebFetch (ask). Anything else is denied for scoped roles.
-- **Design-reviewer read scope** (ADR-018): the `design-reviewer` agent_type is denied reading any
-  `topics/*.architect.md`, in all modes, so its review stays blind to the Architect's recommendation.
+  use the docs MCPs (Context7 `mcp__context7__*`, next-devtools) **read-only**; verifier/security
+  read-only tools; the **architect** may use **`WebFetch`, `WebSearch` and the Context7 tools
+  (`mcp__context7__*`)**. Anything else is denied for scoped roles.
+- **Design-reviewer policy** (ADR-018): the `design-reviewer` agent_type may use **`WebFetch`,
+  `WebSearch` and the Context7 tools (`mcp__context7__*`)** (fact re-verification) plus read-only tools
+  and its single review-file write; it is **denied reading any `topics/*.architect.md`**, in all modes,
+  so its review stays blind to the Architect's recommendation.
 
 ### Bash inspection — per-role allowlist of shapes (a tripwire)
 - The tokenizer feeds a **per-role allowlist of command shapes**, not a denylist. Scoped roles (tester,
@@ -101,3 +105,6 @@ REQ-052).
   stale "60 s" timeout replaced with CC's actual defaults (600 s / 30 s); `~/.claude/**` deny
   clarified to cover the file route only — CLI flag route blocked by Bash allowlist; P01-T04
   extended to verify `agent_type` consistency and hook sandbox status.
+- **Amended 2026-11-24:** `WebSearch` added to the workspace `settings.json` allow list; the
+  main-session, architect and design-reviewer policies now list `WebFetch`, `WebSearch` and the
+  Context7 tools (`mcp__context7__*`) explicitly.
