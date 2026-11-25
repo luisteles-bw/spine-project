@@ -10,21 +10,21 @@
 | --- | --- |
 | Project | spine |
 | Increment | I01, Spine MVP |
-| Stage | architecture |
-| Current node | I01 architecture stage — outputs written, **all design reviews complete**, gate open |
-| Status | awaiting approval |
+| Stage | development |
+| Current node | I01 development — **P01 Approved**; P01-T01 ready to run |
+| Status | ready |
 | Attempt | none |
-| Open gate | **stage_exit** (I01 architecture) + **plan** (plan.md, P01 phase.md + 6 tasks) |
+| Open gate | none |
 | Frozen nodes | none |
-| Next action | **Human:** `/approve` the `stage_exit` + `plan` gates (all three review types done, every finding has a Response, all decisions recorded), or `/reject <reason>`. |
+| Next action | Run **P01-T01** — the first harness probe. P01's tasks are **manual** probes (`tdd: false`, `check: manual`) that must be executed in a **real Claude Code session** wired with the full switch-over settings (see P01 phase Scope), then recorded; the normal Tester→Coder→Verifier cycle resumes at P02. |
 
 ## Stages of I01
 
 | Stage | Status |
 | --- | --- |
 | discovery | done (2026-11-22) |
-| architecture | in progress |
-| development | not started |
+| architecture | done (2026-11-25) |
+| development | in progress |
 | quality | not started |
 | delivery | not started |
 
@@ -32,13 +32,29 @@
 
 | Phase | Title | Status | Branch |
 | --- | --- | --- | --- |
-| none yet | Written by the Architect in `2-architecture/plan.md` |  |  |
+| P01 | Harness verification spike (6 probes) | **Approved** | phase/P01-harness-spike (to create) |
+| P02 | Repo, toolchain, baseline hardened settings, CI | Planned |  |
+| P03 | Schemas, parser, id index | Planned |  |
+| P04 | Pure core: event log, reducer, transitions | Planned |  |
+| P05 | CLI read side (status/next/context/session/doctor) | Planned |  |
+| P06 | CLI write side (submit/plan apply/cr raise/active.json) | Planned |  |
+| P07 | Checks & secrets | Planned |  |
+| P08 | Git & PR | Planned |  |
+| P09 | Guard & Claude assets | Planned |  |
+| P10 | spine-admin + switch-over | Planned |  |
+| P11 | init + nextjs-static | Planned |  |
+| P12 | Twenty app + sync | Planned |  |
+| P13 | Extra commands (increment/ticket/time/export/upgrade) | Planned |  |
+| P14 | Quality: dogfood + red-team + full audit | Planned |  |
+| P15 | Delivery: v0.1.0 release | Planned |  |
 
 ## Gates passed
 
 | Date | Gate | Node | Result | Note |
 | --- | --- | --- | --- | --- |
 | 2026-11-22 | stage_exit | I01 discovery | approved | Discovery done in a Claude conversation, 18–22 Nov. Output: spec v0.4 (`SPEC`) |
+| 2026-11-25 | stage_exit | I01 architecture | approved | Outputs: architecture.md v4, plan.md v5, security.md v7, conventions v2, 18 ADRs, P01 (phase + 6 tasks). Reviews (ADR-018 transition): topic reviews waived for T01–T17; ADR reviews for 006/009/010/011/012/018; full stage review — all findings have a Response, all decisions recorded. |
+| 2026-11-25 | plan | I01 plan + P01 | approved | plan.md v5 (15 phases, coverage, settings table, parallel human track) + P01 phase.md v3 and its 6 task.md (T01–T06). P01 → Approved. |
 
 ## Log
 
@@ -61,3 +77,5 @@
 - 2026-11-24: **ADR-012 adr review** complete (`reviews/ADR-012.review.md`, closed) — 4 findings; F1+F2 (blockers — settings scope) resolved by **D7** (two-tier split: machine-level keys to `~/.claude/settings.json` via new `spine-admin setup`; workspace retains project-scoped keys; `spine-admin init`/`spine doctor` exit 3 if machine-level block absent; H0 added to H-track); F3 fixed (sandbox.network: none → correct key structure); F4 fixed (fully-qualified key paths in plan.md). Files updated: ADR-012 v3, plan.md v3 (settings table + H0), security.md v5 SEC-007, P01-T05 v2 AC-3. **Remaining for review-complete `stage_exit`:** the stage review.
 - 2026-11-24: **Stage review** complete (`reviews/architecture.review.md`, status open) — **1 blocker + 3 major + 3 minor, all confirmed & fixed**, none rejected. 12 bypass attempts all held. Fixes (all key facts re-verified against live CC docs): **F1** (blocker) the exclusion key is **`sandbox.excludedCommands`** (nested; top-level ignored) — corrected everywhere; **F2** network allowlist resolved to **`sandbox.network.strictAllowlist`** (needs CC ≥ v2.1.219), "pending both paths" retired; **F3** `sandbox.credentials` → **`mode: "deny"`** (masking inoperative under no-network / macOS) and moved to the workspace tier; **F4** stale P01 phase numbers (guard P09, admin P10, checks P07); **F5** CC #90662 re-worded (auto-closed not-planned, not won't-fix); **F6** `cr raise` (+ `setup`) added to the container table; **F7** P01-T04 AC-3 network key. Files: security.md v6, ADR-006 v3, ADR-010 v6, ADR-012 v5, architecture.md v4, plan.md v4, phase.md v3, P01-T01 v2 / T02 v2 / T03 v2 / T04 v3 / T05 v4. **No human decision strictly required; F3 flagged for confirmation (touches D7 "masks").** All three review types (topic waived; adr ×6; stage) now done → `stage_exit` is **review-complete**, pending the human's acknowledgement + `/approve`.
 - 2026-11-25: **Stage-review decisions recorded** (`reviews/architecture.review.md` → **closed**). **F3 confirmed** — `sandbox.credentials` use `mode: "deny"` in the workspace tier, no masking now or later; check secrets inject via spine's `@anthropic-ai/sandbox-runtime` (ADR-011), not CC's sandbox. Two corrections the human raised from the CC settings reference: (a) **D7 rationale** reworded — the three machine-level keys (`sandbox.excludedCommands`/`allowUnsandboxedCommands`/`failIfUnavailable`) have scope **"Any file"** and stay at user level for **precedence + coverage** (user-level `false` beats project `true`; one file covers every workspace), not because workspace is ignored; only `strictAllowlist` (+ masking, unused) is truly user/managed-only; **no placement change**. (b) **`disableAutoMode`** is a **top-level** key; `permissions.disableBypassPermissionsMode` stays under `permissions`; **P01-T05** gains a `claude doctor` acceptance check (AC-5). Files: ADR-012 **v6**, security.md **v7**, plan.md **v5**, P01-T05 **v5**. Gate: **stage_exit + plan** now review-complete and ready for `/approve`.
+- 2026-11-25: **`/approve stage_exit`** (I01 architecture). Architecture stage **exits → development** begins. The **`plan`** gate remains open (approved separately). Next: human `/approve` the plan gate, then the Tester starts P01-T01.
+- 2026-11-25: **`/approve plan`** (I01 plan + P01). P01 → **Approved**; Phases table populated (P01 Approved, P02–P15 Planned). No gate open. Next: run **P01-T01**, the first harness probe (manual, real CC session under the full switch-over settings); record results through P01-T06's go/no-go before P02.
