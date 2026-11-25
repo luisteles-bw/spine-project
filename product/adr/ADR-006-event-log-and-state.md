@@ -5,11 +5,11 @@ title: Event log & state — seq-indexed JSONL source of truth, derived graph.js
 stage: architecture
 status: accepted
 superseded_by:
-version: 2
+version: 3
 refs: [REQ-010, SEC-002, SEC-012, SEC-003]
 visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 ## Context
@@ -49,7 +49,8 @@ here. The integrity model assumes "only the spine writes state" (SEC-002) — wh
 
 ### Enforcing "only the spine writes state" (SEC-002)
 The guarantee rests on human-applied settings — sandbox `denyWrite` over `project/state/**` and git,
-`excludedCommands: ["spine *"]`, `allowUnsandboxedCommands: false` and `failIfUnavailable: true`. The
+`sandbox.excludedCommands: ["spine *"]`, `sandbox.allowUnsandboxedCommands: false` and
+`sandbox.failIfUnavailable: true`. The
 **single source** for these and their timing (baseline vs switch-over) is **ADR-012 and the plan's
 "Human-applied settings" table**; they are not restated here. The spine runs **outside** the sandbox and
 never executes project code for this (SEC-016). The `project/state/` layout (committed vs gitignored) is
@@ -88,3 +89,6 @@ in `architecture.md`; the glob `project/state/**` is entirely under `denyWrite` 
 - **Amended 2026-11-23:** `actor` is defined by the writing binary (not agent-shell detection, ADR-012);
   the settings-enforcement list now points to ADR-012 + the plan table; phase numbers removed; visibility
   → internal.
+- **Amended 2026-11-24 (stage review, F1):** corrected the enforcement key names to the nested forms
+  `sandbox.excludedCommands`, `sandbox.allowUnsandboxedCommands`, `sandbox.failIfUnavailable` (a
+  top-level `excludedCommands` is ignored by Claude Code). ADR-012 remains the single source.

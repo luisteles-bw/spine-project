@@ -4,7 +4,7 @@ type: architecture
 title: Spine architecture
 stage: architecture
 status: draft
-version: 3
+version: 4
 refs: [ADR-001, ADR-002, ADR-003, ADR-004, ADR-005, ADR-006, ADR-007, ADR-008, ADR-009, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015, ADR-016, ADR-017, ADR-018, REQUIREMENTS, SECURITY, SPEC-ERRATA]
 visibility: client
 author: architect
@@ -27,8 +27,8 @@ and fixed lifecycles. *The spine decides, agents do the work, the human approves
 
 | Container | What it is | Sandbox status |
 | --- | --- | --- |
-| **`spine`** | Agent + main-session CLI: `status, next, context, submit, check, pr, sync, plan apply, session, log, doctor` | Excluded (writes state) — ADR-012 |
-| **`spine-admin`** | Human-only binary: `approve, reject, phase cut, repair, init, upgrade, import` | **Not** excluded — the OS boundary (ADR-012) |
+| **`spine`** | Agent + main-session CLI: `status, next, context, submit, check, pr, sync, plan apply, cr raise, session, log, doctor` | Excluded (writes state) — ADR-012 |
+| **`spine-admin`** | Human-only binary: `approve, reject, phase cut, repair, init, upgrade, import, setup` | **Not** excluded — the OS boundary (ADR-012) |
 | **`spine-guard`** | PreToolUse hook binary: fast allow/deny | Runs outside sandbox; `|| exit 2` (ADR-010) |
 | **Pure core** | Library inside the bins: lifecycles, reducer, validation, documents, context, graph | n/a (no I/O) — ADR-001 |
 | **Twenty app** | SDK-defined CRM model + REST sync target | Separate deployable (ADR-014) |

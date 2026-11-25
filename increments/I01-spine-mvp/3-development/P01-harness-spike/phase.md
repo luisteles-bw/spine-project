@@ -6,7 +6,7 @@ increment: I01
 stage: development
 parent: I01-PLAN
 status: draft
-version: 2
+version: 3
 refs: [SECURITY, ADR-006, ADR-009, ADR-010, ADR-011, ADR-012, ADR-017]
 branch: phase/P01-harness-spike
 billing: none
@@ -32,10 +32,10 @@ will actually ship. If a probe fails, the affected ADR(s) are re-planned (via CR
 ## Tasks
 | Task | Title | Size | Est. h | Depends on |
 | --- | --- | --- | --- | --- |
-| P01-T01 | `denyWrite` blocks a Bash append; nested `.env` read + credential masking | S | 1 | none |
-| P01-T02 | `excludedCommands`: excluded `spine` writes, non-excluded `spine-admin` blocked | S | 1 | P01-T01 |
+| P01-T01 | `denyWrite` blocks a Bash append; nested `.env` read + `sandbox.credentials` deny | S | 1 | none |
+| P01-T02 | `sandbox.excludedCommands`: excluded `spine` writes, non-excluded `spine-admin` blocked | S | 1 | P01-T01 |
 | P01-T03 | PreToolUse **exit 2** blocks (exit 1 doesn't); missing guard behind `\|\| exit 2` blocks | S | 1 | none |
-| P01-T04 | Hook input carries **`agent_type`**; `sandbox.network: none` prompt behaviour | S | 1 | none |
+| P01-T04 | Hook input carries **`agent_type`**; `sandbox.network.strictAllowlist` deny behaviour | S | 1 | none |
 | P01-T05 | `spine` resolution (alias / PATH shadow) + every settings key exists in the installed CC | S | 1 | none |
 | P01-T06 | Findings record + go/no-go | S | 1 | P01-T01..T05 |
 

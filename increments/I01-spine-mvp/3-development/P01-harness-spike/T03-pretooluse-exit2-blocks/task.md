@@ -6,7 +6,7 @@ increment: I01
 stage: development
 parent: P01
 status: planned
-version: 1
+version: 2
 refs: [ADR-010]
 scope:
   touch: ["project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/**"]
@@ -21,7 +21,7 @@ criteria:
 billing: none
 visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-24
 ---
 
 ## Goal
@@ -39,5 +39,5 @@ ADR-010's fail-closed design hinges on this exact behaviour. If any non-zero cod
 3. Record both, and the Claude Code version.
 
 ## Out of scope
-- The real guard logic (P07).
-- Measuring hook latency (P07 budget work).
+- The real guard logic (P09).
+- Measuring hook latency (P09 budget work).

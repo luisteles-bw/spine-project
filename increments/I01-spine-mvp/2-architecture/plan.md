@@ -6,11 +6,11 @@ increment: I01
 stage: architecture
 parent: I01
 status: draft
-version: 3
+version: 5
 refs: [REQUIREMENTS, SECURITY, ARCH, ADR-001, ADR-009, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015, ADR-016, ADR-017, ADR-018]
 visibility: internal
 author: architect
-updated: 2026-11-24
+updated: 2026-11-25
 ---
 
 > **v2 (2026-11-23), pre-gate review.** Split old P05 (CLI) and P06 (checks+git) so no phase breaks the
@@ -20,6 +20,16 @@ updated: 2026-11-24
 >
 > **v3 (2026-11-24):** wired in independent design reviews (ADR-018) — REQ-090 → P06, REQ-091 → P09, a
 > bootstrap settings row, and coverage.
+>
+> **v4 (2026-11-24), stage review (F1/F2/F3):** corrected sandbox settings-key names against current CC
+> docs — `sandbox.excludedCommands` (not top-level `excludedCommands`), `sandbox.network.strictAllowlist`
+> (path resolved, "pending" retired), and `sandbox.credentials` → `mode: "deny"` (masking inoperative
+> under the no-network posture; the H0 credentials row folds into the P02 workspace row).
+>
+> **v5 (2026-11-25), stage-review decisions:** corrected the H0 rationale (the three machine-level keys
+> have scope "Any file"; user placement is for precedence + coverage, not because workspace is ignored —
+> only `strictAllowlist` is strictly user/managed-only); split `disableAutoMode` (top-level) from
+> `permissions.disableBypassPermissionsMode`; added a `claude doctor` acceptance check to P01-T05.
 
 ## Phases
 
@@ -125,20 +135,19 @@ MCP (incl. Context7) runs outside the sandbox, and the excluded `spine` makes it
 | When | Setting / action | Why | ADR / D |
 | --- | --- | --- | --- |
 | **Bootstrap (now)** | copy `design-reviewer` and the three `review-*` commands into `.claude/` | the architecture stage's independent reviews (ADR-018) run via these | 018 |
-| **Machine setup (H0, `spine-admin setup` → `~/.claude/settings.json`, once per machine)** | `sandbox.failIfUnavailable: true`, `sandbox.allowUnsandboxedCommands: false` | Only honored from user/managed scope; must be present before P01 (`spine-admin init` exits 3 if absent) | 006, 012, D7 |
-| Machine setup (H0) | `excludedCommands: ["spine *"]` | Ignored from workspace scope in admin-required mode; must be user-level | 006, 012, D7 |
-| Machine setup (H0) | `strictAllowlist: true` (no `allowedDomains`) — **key path pending P01-T05 AC-4** (docs show both `sandbox.strictAllowlist` and `sandbox.network.strictAllowlist`); needs **CC ≥ v2.1.219** | Requires user/managed scope; agent Bash has no network (D2) | D2, 012, D7 |
-| Machine setup (H0) | `sandbox.credentials` masks for token env vars | Requires user/managed scope | 011, 012, D7 |
+| **Machine setup (H0, `spine-admin setup` → `~/.claude/settings.json`, once per machine)** | `sandbox.failIfUnavailable: true`, `sandbox.allowUnsandboxedCommands: false` | Scope "Any file", but set at user level for precedence + coverage: a user-level value overrides a project override and covers every workspace. Must be present before P01 (`spine-admin init` exits 3 if absent) | 006, 012, D7 |
+| Machine setup (H0) | `sandbox.excludedCommands: ["spine *"]` | Set at user scope so an agent can't relax it via a project `.claude/settings.json` (scope "Any file") | 006, 012, D7 |
+| Machine setup (H0) | `sandbox.network.strictAllowlist: true` (no `allowedDomains`); needs **CC ≥ v2.1.219** | **Truly user/managed-only** scope; agent Bash has no network (D2). Key path resolved against current docs (stage review F2) | D2, 012, D7 |
 | **Baseline (P02)** | `sandbox.enabled: true` | Enable the sandbox | 006, 012 |
 | Baseline (P02) | `sandbox.network.allowedDomains: []` | Workspace-scope duplicate of machine-level strictAllowlist (documentation only; not relied on) | D2, 012, D7 |
-| Baseline (P02) | `disableBypassPermissionsMode: "disable"`, `disableAutoMode: "disable"` | Close the mode-switch escape hatches | 012 |
+| Baseline (P02) | `permissions.disableBypassPermissionsMode: "disable"` (under `permissions`); top-level `disableAutoMode: "disable"` | Close the mode-switch escape hatches (note the differing key scopes per the CC settings reference) | 012 |
 | Baseline (P02) | allow `Bash(spine *)`, read-only `git` (status/diff/log/show), `WebSearch`; **allow `git add`/`commit`/`switch`** | Dispatcher commits one per task during bootstrap (D1); `WebSearch` for fact-checking | 009, 010, D1 |
 | Baseline (P02) | ask `Bash(spine pr *)`, `WebFetch` | `spine pr` pushes/opens a PR; ask is evaluated before allow. **WebFetch stays on `ask`**; documentation-domain allow rules deferred to a decision after the stage review | 009, 012 |
 | Baseline (P02) | deny `Bash(spine-admin *)`, `Bash(gh *)`, git push/merge/rebase/reset/checkout/clean/branch-D/tag | Human-only boundary; no `gh` reflex-approvals; spine owns history | 009, 012 |
 | Baseline (P02) | deny **installs**: `pnpm add/remove/up/install/i/update/create`, `pnpm dlx`, `npx`, `npm`, `yarn`, `bunx`, `corepack` | `new_dependency` gate; a speedbump behind D2's no-network | 011, D6 |
 | Baseline (P02) | deny `cat *.env*` / Read `.env*`, `security`, `secret-tool` | Keep secrets off the agent | 011 |
 | Baseline (P02) | deny Edit/Write `.claude/**` · `~/.claude/**` · `spine.yaml` · **shell rc (`~/.zshrc`,`~/.zprofile`,`~/.bashrc`,`~/.bash_profile`,`~/.profile`)** | No tampering with rules, nor alias/PATH hijack of `spine` | 012, 014→ADR-017 |
-| Baseline (P02) | `sandbox.filesystem.denyRead`: `.env*`, home creds (`~/.ssh`,`~/.aws`,`~/.config/gh`,`~/.npmrc`,`~/.netrc`,`~/.git-credentials`); `sandbox.credentials` entries (`mode: "deny"`; macOS: `mask`→`deny` fallback) mask token env vars | Secrets unreadable | 011, 012 |
+| Baseline (P02) | `sandbox.filesystem.denyRead`: `.env*`, home creds (`~/.ssh`,`~/.aws`,`~/.config/gh`,`~/.npmrc`,`~/.netrc`,`~/.git-credentials`); `sandbox.credentials` token env vars with **`mode: "deny"`** (masking needs TLS-termination + a reachable `injectHosts`, so it is inoperative under the no-network posture; macOS applies `mask` as `deny`) — workspace-scope key | Secrets unreadable | 011, 012 |
 | Baseline (P02) | `sandbox.filesystem.denyWrite` mirroring **every** Edit/Write deny (`.claude`,`~/.claude`,`CLAUDE.md`,`.mcp.json`,`spec.md`, shell rc) | Edit denies don't promise to stop Bash writes | 012 |
 | Baseline (P02) | env `GIT_OPTIONAL_LOCKS=0` | Read-only `git status` won't write | 009 |
 | **Switch-over (P10)** | `sandbox.filesystem.denyWrite` **add** `project/state/**`, `STATE.md`, `project/.git`, `code/.git`, `spine.yaml` | Only the spine writes state/git once it owns them | 006, 009, 012 |
@@ -153,7 +162,7 @@ MCP (incl. Context7) runs outside the sandbox, and the excluded `spine` makes it
 
 | # | Task | When | Why |
 | --- | --- | --- | --- |
-| H0 | **Apply user-level settings block** — until `spine-admin setup` ships, manually add the machine-level keys (`sandbox.failIfUnavailable: true`, `sandbox.allowUnsandboxedCommands: false`, `excludedCommands: ["spine *"]`, `sandbox.network.strictAllowlist: true`, `sandbox.credentials` masks) to `~/.claude/settings.json` | **Before P01** | These keys are ignored from workspace scope; `spine-admin init` exits 3 if any are absent; P01 probes assume the hardened config is in place |
+| H0 | **Apply user-level settings block** — until `spine-admin setup` ships, manually add the machine-level keys (`sandbox.failIfUnavailable: true`, `sandbox.allowUnsandboxedCommands: false`, `sandbox.excludedCommands: ["spine *"]`, `sandbox.network.strictAllowlist: true`) to `~/.claude/settings.json` | **Before P01** | These keys are ignored from workspace scope; `spine-admin init` exits 3 if any are absent; P01 probes assume the hardened config is in place |
 | H1 | **Client bootstrap kit** — package this workspace's commands, agents and baseline settings (minus spine-specific docs) + the `nextjs-static` overlay as a **manual checklist**, same `STATE.md` format | Before the first December client starts | Lets a client run in bootstrap mode now; same format means ADR-016 import works for it later |
 | H2 | **Install Twenty now**; use built-in Opportunities/Companies natively for December sales, with `taxonomy.json` stage names | Now | Real pipeline before `sync` (P12); no rework of categories later |
 | H3 | **Bootstrap backup** — push `project/` by hand after each `/approve` (until `spine-admin` exists, then D4 automates it) | Now, every approval | `project/` is the only home of the event log |

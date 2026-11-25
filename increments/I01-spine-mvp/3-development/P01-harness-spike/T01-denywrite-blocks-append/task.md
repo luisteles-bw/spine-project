@@ -6,7 +6,7 @@ increment: I01
 stage: development
 parent: P01
 status: planned
-version: 1
+version: 2
 refs: [SEC-002, ADR-006, ADR-012]
 scope:
   touch: ["project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/**"]
@@ -18,11 +18,11 @@ criteria:
   - { id: AC-1, check: manual, text: "When an agent Bash call runs `echo x >> <state-dir>/probe.txt` under a fixture settings.json whose sandbox denyWrite covers <state-dir>, Claude Code blocks the write and the file is unchanged" }
   - { id: AC-2, check: manual, text: "A sandboxed Edit/Write to the same path is also blocked, and with failIfUnavailable:true a missing sandbox makes the command fail rather than run unsandboxed" }
   - { id: AC-3, check: manual, text: "A sandboxed `cat` / `node -e` read of a `.env` file in a nested directory is blocked by `denyRead` (sandbox path/glob semantics confirmed to cover nested paths)" }
-  - { id: AC-4, check: manual, text: "`sandbox.credentials` masks a token env var: a probe that echoes the var sees a masked value, not the secret" }
+  - { id: AC-4, check: manual, text: "`sandbox.credentials` with `mode: \"deny\"` makes a token env var unavailable to a sandboxed probe that echoes it (on macOS tier 1 `mask` is applied as `deny`, and masking would anyway need TLS-termination + network that the no-network posture forbids)" }
 billing: none
 visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-24
 ---
 
 ## Goal

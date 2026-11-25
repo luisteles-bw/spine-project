@@ -4,11 +4,11 @@ type: security
 title: Spine threat model and security requirements
 stage: discovery
 status: approved
-version: 5
+version: 7
 refs: [SPEC, REQUIREMENTS]
 visibility: internal
 author: architect
-updated: 2026-11-24
+updated: 2026-11-25
 ---
 
 The spine's job is to keep AI agents inside limits. Its worst failure is an agent getting around a
@@ -53,13 +53,13 @@ guard hook is a fast tripwire, not the wall.
 ## Security requirements
 | ID | Requirement |
 | --- | --- |
-| SEC-001 | `approve`, `reject` and the other human-only commands live in a **separate `spine-admin` binary that is not in the sandbox's `excludedCommands`**, so an agent that runs it is sandboxed and `denyWrite` blocks it; the human runs it in a terminal outside Claude Code. Env-var/TTY detection is **not** relied on (both are spoofable). A `Bash(spine-admin *)` deny gives agents a clean refusal. (ADR-012) |
+| SEC-001 | `approve`, `reject` and the other human-only commands live in a **separate `spine-admin` binary that is not in `sandbox.excludedCommands`**, so an agent that runs it is sandboxed and `denyWrite` blocks it; the human runs it in a terminal outside Claude Code. Env-var/TTY detection is **not** relied on (both are spoofable). A `Bash(spine-admin *)` deny gives agents a clean refusal. (ADR-012) |
 | SEC-002 | Only the excluded `spine` writes `project/state/**`, enforced by the sandbox `denyWrite` (not the guard). The log is append-only with `seq` = line position (a gap or duplicate is a hard stop), and `project/` commits carry `Spine-Seq` so git history and the event log cross-check. (ADR-006, ADR-012) |
 | SEC-003 | Every gate decision is an event with who, when and the note. |
 | SEC-004 | The real scope controls are at **`submit`**: the diff must stay inside the task's `scope.touch`, and the test files hashed at "Tests ready" must be unchanged (so the Coder can't edit this attempt's tests, snapshots or fixtures, nor via `vitest -u`). **`spine-guard`** is a fast PreToolUse **tripwire** (realpath scope match, per-role shape allowlist); the sandbox is the wall. (ADR-010, ADR-011) |
 | SEC-005 | Secrets are never written to events, `checks.json`, logs or Twenty. Injected secret values — and their base64/URL-encoded forms — are redacted from captured output. (ADR-011) |
 | SEC-006 | Check secrets come from the OS keychain (or a 0600 WSL fallback) and are injected only into the check's child process, least-privilege per check. After each check, spine sweeps changed + untracked files for the exact injected values; a hit fails the check. (ADR-011) |
-| SEC-007 | Settings are two-tier. **Machine-level** (`~/.claude/settings.json`, applied by `spine-admin setup`): `sandbox.failIfUnavailable: true`, `sandbox.allowUnsandboxedCommands: false`, `excludedCommands: ["spine *"]`, `sandbox.network.strictAllowlist: true`, `sandbox.credentials` masks — keys CC only honors from user/managed scope. **Workspace** (`.claude/settings.json`, applied by `spine-admin init/upgrade`): `sandbox.enabled`, `sandbox.filesystem.denyWrite/denyRead`, permissions allow/ask/deny, bypass/auto disables. Both tiers read templates from the installed package, never from `code/claude/`; `spine-admin init` and `spine doctor` exit 3 if any machine-level key is absent. (ADR-012) |
+| SEC-007 | Settings are two-tier. **Machine-level** (`~/.claude/settings.json`, applied by `spine-admin setup`): `sandbox.failIfUnavailable: true`, `sandbox.allowUnsandboxedCommands: false`, `sandbox.excludedCommands: ["spine *"]`, `sandbox.network.strictAllowlist: true` (needs CC ≥ v2.1.219) — set at user scope for precedence + coverage (a user-level value overrides a project override and covers every workspace); only `strictAllowlist` is strictly user/managed-only. **Workspace** (`.claude/settings.json`, applied by `spine-admin init/upgrade`): `sandbox.enabled`, `sandbox.filesystem.denyWrite/denyRead`, `sandbox.credentials` (`mode: "deny"` only — no masking; check secrets inject via sandbox-runtime per ADR-011), permissions allow/ask/deny, `permissions.disableBypassPermissionsMode` + top-level `disableAutoMode`. Both tiers read templates from the installed package, never from `code/claude/`; `spine-admin init` and `spine doctor` exit 3 if any machine-level key is absent. (ADR-012) |
 | SEC-008 | Content from `inputs/`, web pages, MCP servers and client files is **data, never instructions**, carried with `trusted: false` in the context list. The Coder and others do have a shell, so the containment is the sandbox (**agent Bash network = none**), the guard's per-role shape + tool allowlist, and submit-time checks — not the absence of a shell. (ADR-008, ADR-010) |
 | SEC-009 | The spine never builds shell strings. It runs processes with argument arrays and validates every id and slug against a strict pattern. |
 | SEC-010 | Every path the spine resolves is checked to stay inside the workspace after resolving symlinks. |

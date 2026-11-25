@@ -5,7 +5,7 @@ title: Guard hook — one global agent_type-keyed hook, active.json, allowlist t
 stage: architecture
 status: accepted
 superseded_by:
-version: 5
+version: 6
 refs: [REQ-051, REQ-052, SEC-004, SEC-001]
 visibility: internal
 author: architect
@@ -28,7 +28,8 @@ REQ-052).
   calls too). No `agent_type` = the **main session** (its own fixed policy) **only when no scoped role
   is active**; if `active.json` holds a scoped role, absent `agent_type` is treated as mismatched and
   **denied** — the real actor is ambiguous (CC issue #90662 — absent `agent_type` in running subagents;
-  closed won't-fix). **Unknown agent types are read-only.** (This replaces the spec's per-agent
+  auto-closed as not-planned 2026-10-31, so the behaviour is unverified and treated defensively).
+  **Unknown agent types are read-only.** (This replaces the spec's per-agent
   `spine guard --role coder`.)
 - Spine writes a tiny **`active.json`** — `{ seq, role, node, attempt, scope:{touch,forbid}, testFiles }`
   — **inside the same ADR-006 lock as the event append**, carrying the event `seq`, so state and
@@ -108,3 +109,6 @@ REQ-052).
 - **Amended 2026-11-24:** `WebSearch` added to the workspace `settings.json` allow list; the
   main-session, architect and design-reviewer policies now list `WebFetch`, `WebSearch` and the
   Context7 tools (`mcp__context7__*`) explicitly.
+- **Amended 2026-11-24 (stage review, F5):** CC #90662 re-characterised — it was **auto-closed as
+  not-planned** (never investigated), not "closed won't-fix"; the absent-`agent_type` behaviour is
+  therefore unverified and treated defensively. The unified deny rule is unchanged.
