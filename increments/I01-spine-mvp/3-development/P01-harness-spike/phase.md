@@ -6,14 +6,14 @@ increment: I01
 stage: development
 parent: I01-PLAN
 status: draft
-version: 3
+version: 4
 refs: [SECURITY, ADR-006, ADR-009, ADR-010, ADR-011, ADR-012, ADR-017]
-branch: phase/P01-harness-spike
+branch: none
 billing: none
 estimate_h: 6
 visibility: internal
 author: architect
-updated: 2026-11-24
+updated: 2026-11-26
 ---
 
 ## Goal
@@ -45,3 +45,13 @@ will actually ship. If a probe fails, the affected ADR(s) are re-planned (via CR
 - [ ] `review.md` passed (checks and security)
 - [ ] Findings record states the Claude Code version and a clear **go/no-go**
 - [ ] If any probe failed, a CR re-planning the affected ADR(s) is raised before P02
+- [ ] Probe cleanup done: stub `spine`/`spine-admin` removed and the probe-only PATH dir cleared,
+      `~/.zshrc` restored if the alias case was tested, throwaway workspace deleted (H0
+      `excludedCommands: ["spine *"]` is machine-wide, so no stub `spine` may linger on `PATH`)
+
+## Exit mechanism (P01-only exception)
+P01 produces **records only** (probe scaffolding, captures, findings) — no code and no `code/` branch.
+Per ADR-009 `project/` is a single `main` with one commit per transition, so P01 has **no phase branch
+and no `phase_pr` gate**: it exits through the **phase review** (checks + security over the records)
+and then the human's **`/approve`**. The `phase_pr` flow and the Tester→Coder→Verifier task cycle
+resume at P02, which branches in `code/` from `dev`.

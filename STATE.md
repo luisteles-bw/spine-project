@@ -11,12 +11,12 @@
 | Project | spine |
 | Increment | I01, Spine MVP |
 | Stage | development |
-| Current node | I01 development — **P01 Approved**; P01-T01 ready to run |
+| Current node | I01 development — **P01 In progress**; specs amended, P01-T01 scaffolding authored |
 | Status | ready |
-| Attempt | none |
+| Attempt | 1 |
 | Open gate | none |
 | Frozen nodes | none |
-| Next action | Run **P01-T01** — the first harness probe. P01's tasks are **manual** probes (`tdd: false`, `check: manual`) that must be executed in a **real Claude Code session** wired with the full switch-over settings (see P01 phase Scope), then recorded; the normal Tester→Coder→Verifier cycle resumes at P02. |
+| Next action | Human: build the throwaway workspace (**S2**) from plan.md's baseline+switch-over rows (paths swapped), run `claude doctor` and fix every reject (**S2b**), then run **P01-T01** in a hardened session and capture output into its `probes/denywrite/output/`. P01 is **records-only** — no phase branch, exits via phase review + `/approve` (not `phase_pr`). The normal Tester→Coder→Verifier cycle resumes at P02. |
 
 ## Stages of I01
 
@@ -32,7 +32,7 @@
 
 | Phase | Title | Status | Branch |
 | --- | --- | --- | --- |
-| P01 | Harness verification spike (6 probes) | **Approved** | phase/P01-harness-spike (to create) |
+| P01 | Harness verification spike (6 probes) | **In progress** | none — records-only (exits via review + /approve) |
 | P02 | Repo, toolchain, baseline hardened settings, CI | Planned |  |
 | P03 | Schemas, parser, id index | Planned |  |
 | P04 | Pure core: event log, reducer, transitions | Planned |  |
@@ -79,3 +79,4 @@
 - 2026-11-25: **Stage-review decisions recorded** (`reviews/architecture.review.md` → **closed**). **F3 confirmed** — `sandbox.credentials` use `mode: "deny"` in the workspace tier, no masking now or later; check secrets inject via spine's `@anthropic-ai/sandbox-runtime` (ADR-011), not CC's sandbox. Two corrections the human raised from the CC settings reference: (a) **D7 rationale** reworded — the three machine-level keys (`sandbox.excludedCommands`/`allowUnsandboxedCommands`/`failIfUnavailable`) have scope **"Any file"** and stay at user level for **precedence + coverage** (user-level `false` beats project `true`; one file covers every workspace), not because workspace is ignored; only `strictAllowlist` (+ masking, unused) is truly user/managed-only; **no placement change**. (b) **`disableAutoMode`** is a **top-level** key; `permissions.disableBypassPermissionsMode` stays under `permissions`; **P01-T05** gains a `claude doctor` acceptance check (AC-5). Files: ADR-012 **v6**, security.md **v7**, plan.md **v5**, P01-T05 **v5**. Gate: **stage_exit + plan** now review-complete and ready for `/approve`.
 - 2026-11-25: **`/approve stage_exit`** (I01 architecture). Architecture stage **exits → development** begins. The **`plan`** gate remains open (approved separately). Next: human `/approve` the plan gate, then the Tester starts P01-T01.
 - 2026-11-25: **`/approve plan`** (I01 plan + P01). P01 → **Approved**; Phases table populated (P01 Approved, P02–P15 Planned). No gate open. Next: run **P01-T01**, the first harness probe (manual, real CC session under the full switch-over settings); record results through P01-T06's go/no-go before P02.
+- 2026-11-26: **P01 run-decisions folded in** (human directives). **phase.md v4:** P01 is records-only — **no phase branch / no `phase_pr`** (ADR-009 single `main`); exits via phase review + `/approve`; stub cleanup added to Exit criteria. Task amendments: **T01 v3** (Edit/Write blocked by an `Edit`/`Write` permission deny, not `denyWrite`; credentials use `credentials.envVars`/`files`), **T02 v3** (spine-admin probed twice — prefix form → permission-layer refusal, full path → `denyWrite` OS boundary; stubs in a probe-only PATH dir), **T04 v4** (AC-5 hook now **writes** into the `denyWrite` state/ dir to prove hooks are unsandboxed), **T05 v6** (PATH-shadow is the required test; alias optional + restore `~/.zshrc`). H0 being applied permanently to `~/.claude/settings.json` (D2/D7); `dev` to be created by the human in `code/` for P02. Committed on `project/` `main`. Next: build throwaway workspace + `claude doctor` (S2/S2b), then run P01-T01.
