@@ -1,0 +1,22 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "filesystem": {
+      "denyWrite": ["/Users/luisteles/spine-harness-probe/state/**"]
+    },
+    "network": {
+      "allowedDomains": []
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "/Users/luisteles/spine-harness-probe/hooks/log-hook.sh" }
+        ]
+      }
+    ]
+  }
+}
