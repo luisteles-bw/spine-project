@@ -1,9 +1,8 @@
 {
   "permissions": {
     "deny": [
-      "Edit(/Users/luisteles/spine-harness-probe/state/**)",
-      "Write(/Users/luisteles/spine-harness-probe/state/**)",
-      "Read(/Users/luisteles/spine-harness-probe/**/.env*)"
+      "Edit(./state/**)",
+      "Read(./**/.env*)"
     ]
   },
   "sandbox": {

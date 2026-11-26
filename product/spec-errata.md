@@ -4,11 +4,11 @@ type: errata
 title: Errata to SPEC v0.4 and the write-protected bootstrap files
 stage: architecture
 status: draft
-version: 1
+version: 2
 refs: [SPEC, ARCH, ADR-010, ADR-011, ADR-012, ADR-013]
 visibility: internal
 author: architect
-updated: 2026-11-23
+updated: 2026-11-26
 ---
 
 `spec.md`, `CLAUDE.md` and `.claude/` are write-protected (the human's). The architecture stage changed
@@ -25,6 +25,7 @@ to the schema enum in P03; additive, per ADR-004.)
 | Lifecycles (l.285); spine.yaml (l.377) | "passes only with `spine approve`" / "only `spine approve` passes these" | **`spine-admin approve`** (ADR-012) |
 | Agents (l.482, l.508, l.525) | Per-agent hook `spine guard --role coder`; `guard.sh`; "the per-agent hook means spine guard always knows the role" | **One global PreToolUse hook `spine-guard \|\| exit 2`**, role from the hook input's **`agent_type`** (ADR-010); binary is **`spine-guard`** |
 | Agents, settings.json example (l.543–559) | The inline `permissions` block | Superseded by the **consolidated settings model** (ADR-012 + plan "Human-applied settings") |
+| Agents, settings.json example (l.556–557) | deny `Write(project/state/**)`, `Write(.claude/**)` | A `Write(...)` permission rule is **never matched** — the `Edit(...)` rule governs **both** the Edit and Write tools, so only `Edit(project/state/**)` / `Edit(.claude/**)` are needed. Permission-rule paths are **relative to the session cwd** (a leading `/` anchors at cwd, not the filesystem root); the `project/state/**` / `.claude/**` paths here are already relative and correct. Confirmed by `claude doctor` (P01-T01). |
 | Agents, next.md example (l.538) | "Never run `spine approve` or `spine reject`" | Approvals are human-only in a terminal; agents never run `spine-admin *` (denied) (ADR-012) |
 | Client code repo (l.116) | "The contract … is the root `package.json` scripts … it only runs `pnpm lint/typecheck/test/build`" | Scripts still exist for CI/humans (REQ-002), but the spine's **`check` calls tools directly** (`pnpm exec vitest/eslint/tsc`), never the scripts (ADR-011) |
 | Spine CLI (l.335) | "Nineteen commands" (one `spine`) | Split across **three binaries** — `spine` (agent+main, excluded), `spine-guard` (hook), `spine-admin` (human-only, not excluded) (ADR-012) |

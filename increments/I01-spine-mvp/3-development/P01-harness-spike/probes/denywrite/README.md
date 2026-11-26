@@ -1,7 +1,7 @@
 # P01-T01 — denyWrite blocks a Bash append (probe runbook)
 
 Proves the assumptions under ADR-006 / ADR-012: sandbox `denyWrite` / `denyRead` stop Bash
-writes/reads; an `Edit`/`Write` **permission deny** (not `denyWrite`) stops the Edit/Write tools;
+writes/reads; an `Edit(...)` **permission deny** (not `denyWrite`) stops the Edit/Write tools;
 `sandbox.credentials.envVars` with `mode: "deny"` hides a token from a sandboxed probe; and
 `failIfUnavailable: true` makes a missing sandbox fail rather than run unsandboxed.
 
@@ -28,7 +28,7 @@ writes/reads; an `Edit`/`Write` **permission deny** (not `denyWrite`) stops the 
 | AC | PASS |
 | --- | --- |
 | AC-1 | Bash append refused; `state/probe.txt` line count unchanged |
-| AC-2 | Edit **and** Write to `state/**` both refused by the `Edit`/`Write` permission deny |
+| AC-2 | Edit **and** Write to `state/**` both refused by the `Edit(./state/**)` deny (the `Edit(...)` rule governs both the Edit and Write tools) |
 | AC-3 | `cat` and `node` reads of the nested `.env` both blocked by `denyRead` |
 | AC-4 | `PROBE_TOKEN` empty / unavailable to the sandboxed probe |
 | failIfUnavailable | with no sandbox, the Bash write **fails** (not run unsandboxed) |
@@ -38,8 +38,11 @@ A FAIL on any row → red probe; name **ADR-006 / ADR-012** for the T06 go/no-go
 
 ## How the fixture is built (notes)
 - `sandbox.filesystem.denyWrite` / `denyRead` govern **Bash** only. The **Edit/Write tools obey
-  permission rules**, so the `permissions.deny` `Edit(...)`/`Write(...)` entries are what stop them —
-  `denyWrite` alone would not.
+  permission rules**, so the `permissions.deny` `Edit(./state/**)` entry is what stops them — the
+  `Edit(...)` rule covers **both** the Edit and Write tools, and a `Write(...)` rule is **never
+  matched**; `denyWrite` alone would not stop them either.
+- Permission-rule paths are **relative to the session cwd** (a single leading `/` anchors at cwd, not
+  the filesystem root), so they use `./…` or `~/…`. Only `sandbox.filesystem` paths are absolute.
 - `sandbox.credentials` shape (per the CC sandboxing docs): `envVars` entries are
   `{ "name": "<VAR>", "mode": "deny" }`; `files` entries are `{ "path": "<path>", "mode": "deny" }`
   (paths follow the `sandbox.filesystem` prefix rules). This probe uses one `envVars` entry for the token.
