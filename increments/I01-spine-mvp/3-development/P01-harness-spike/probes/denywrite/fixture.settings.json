@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(/Users/luisteles/spine-harness-probe/state/**)",
+      "Write(/Users/luisteles/spine-harness-probe/state/**)",
+      "Read(/Users/luisteles/spine-harness-probe/**/.env*)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "filesystem": {
+      "denyWrite": ["/Users/luisteles/spine-harness-probe/state/**"],
+      "denyRead": ["/Users/luisteles/spine-harness-probe/**/.env*"]
+    },
+    "credentials": {
+      "envVars": [{ "name": "PROBE_TOKEN", "mode": "deny" }]
+    }
+  }
+}
