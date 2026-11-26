@@ -6,7 +6,7 @@ increment: I01
 stage: development
 parent: P01
 status: planned
-version: 6
+version: 7
 refs: [SEC-020, ADR-012, ADR-017]
 scope:
   touch: ["project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/resolution/**"]
@@ -15,7 +15,7 @@ size: S
 estimate_h: 1
 tdd: false
 criteria:
-  - { id: AC-1, check: manual, text: "Determine how Claude Code matches sandbox.excludedCommands [\"spine *\"]: with a stub `spine` earlier on PATH (the required test), record whether a PATH entry can shadow the excluded binary (SEC-020). The shell-alias case is optional and, if run, must restore `~/.zshrc` afterwards" }
+  - { id: AC-1, check: manual, text: "Determine how Claude Code matches sandbox.excludedCommands [\"spine *\"]: with a stub `spine` earlier on PATH, record whether a PATH entry can shadow the excluded binary and run unsandboxed (SEC-020). The shell-alias vector is NOT separately probed — Claude Code captures `~/.zshrc` aliases at session start, so a terminal alias tests nothing; it is a known residual mitigated by the shell-rc write denies + preflight" }
   - { id: AC-2, check: manual, text: "Every settings key the switch-over config relies on (sandbox.enabled, sandbox.failIfUnavailable, sandbox.allowUnsandboxedCommands, sandbox.excludedCommands, sandbox.network.allowedDomains, sandbox.network.strictAllowlist, sandbox.filesystem.denyWrite, sandbox.filesystem.denyRead, sandbox.credentials, permissions.disableBypassPermissionsMode, top-level disableAutoMode) is recognised by the installed Claude Code version; any unknown key is recorded" }
   - { id: AC-3, check: manual, text: "For sandbox.allowUnsandboxedCommands: false, sandbox.failIfUnavailable: true, sandbox.excludedCommands, and sandbox.network.strictAllowlist: verify which settings-file scope (workspace .claude/settings.json vs user ~/.claude/settings.json vs managed settings) is required for each key to take effect in admin-required sandbox mode; record exact behaviour observed" }
   - { id: AC-4, check: manual, text: "Confirm `sandbox.network.strictAllowlist: true` is recognised and takes effect on the installed Claude Code (no top-level `sandbox.strictAllowlist` exists per current docs), and that the installed version is v2.1.219 or later (strictAllowlist requires it). Record the version." }
@@ -38,9 +38,10 @@ worthless if a key is silently ignored by this CC version. Preflight / `spine do
 later; here we only learn the behaviour.
 
 ## Steps
-1. Put a stub `spine` earlier on `PATH` (in the probe-only PATH dir) and run `spine`; record what
-   executes and whether `sandbox.excludedCommands` still matched. Optionally also define a shell alias
-   `spine` to repeat the test — if you do, restore `~/.zshrc` afterwards.
+1. Put a stub `spine` earlier on `PATH` (in the probe-only PATH dir) and run `spine probe-write`; record
+   what executes, whether `sandbox.excludedCommands` matched (so it ran unsandboxed), and `command -v
+   spine`. The shell-alias case is a known residual (CC reads `~/.zshrc` aliases at session start), not
+   probed here.
 2. Load the full switch-over `settings.json`; for each key above, confirm Claude Code accepts it (no
    "unknown setting" warning) on this version. Record the CC version.
 3. Run `claude doctor` with the full settings loaded and record that it reports no rejected/unknown
