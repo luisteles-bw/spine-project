@@ -6,7 +6,7 @@ increment: I01
 stage: architecture
 parent: I01
 status: draft
-version: 5
+version: 6
 refs: [REQUIREMENTS, SECURITY, ARCH, ADR-001, ADR-009, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015, ADR-016, ADR-017, ADR-018]
 visibility: internal
 author: architect
@@ -30,6 +30,9 @@ updated: 2026-11-25
 > have scope "Any file"; user placement is for precedence + coverage, not because workspace is ignored —
 > only `strictAllowlist` is strictly user/managed-only); split `disableAutoMode` (top-level) from
 > `permissions.disableBypassPermissionsMode`; added a `claude doctor` acceptance check to P01-T05.
+>
+> **v6 (2026-11-26):** pinned the exact `sandbox.credentials` entry shape from the CC sandboxing docs —
+> `envVars` `{ name, mode }`, `files` `{ path, mode }` — in the baseline settings row (mirrors ADR-012 v7).
 
 ## Phases
 
@@ -147,7 +150,7 @@ MCP (incl. Context7) runs outside the sandbox, and the excluded `spine` makes it
 | Baseline (P02) | deny **installs**: `pnpm add/remove/up/install/i/update/create`, `pnpm dlx`, `npx`, `npm`, `yarn`, `bunx`, `corepack` | `new_dependency` gate; a speedbump behind D2's no-network | 011, D6 |
 | Baseline (P02) | deny `cat *.env*` / Read `.env*`, `security`, `secret-tool` | Keep secrets off the agent | 011 |
 | Baseline (P02) | deny Edit/Write `.claude/**` · `~/.claude/**` · `spine.yaml` · **shell rc (`~/.zshrc`,`~/.zprofile`,`~/.bashrc`,`~/.bash_profile`,`~/.profile`)** | No tampering with rules, nor alias/PATH hijack of `spine` | 012, 014→ADR-017 |
-| Baseline (P02) | `sandbox.filesystem.denyRead`: `.env*`, home creds (`~/.ssh`,`~/.aws`,`~/.config/gh`,`~/.npmrc`,`~/.netrc`,`~/.git-credentials`); `sandbox.credentials` token env vars with **`mode: "deny"`** (masking needs TLS-termination + a reachable `injectHosts`, so it is inoperative under the no-network posture; macOS applies `mask` as `deny`) — workspace-scope key | Secrets unreadable | 011, 012 |
+| Baseline (P02) | `sandbox.filesystem.denyRead`: `.env*`, home creds (`~/.ssh`,`~/.aws`,`~/.config/gh`,`~/.npmrc`,`~/.netrc`,`~/.git-credentials`); `sandbox.credentials.envVars` entries `{ name, mode: "deny" }` for token env vars (and `credentials.files` entries `{ path, mode: "deny" }`, paths per `sandbox.filesystem` prefix rules) — masking needs TLS-termination + a reachable `injectHosts`, so it is inoperative under the no-network posture; macOS applies `mask` as `deny` — workspace-scope key | Secrets unreadable | 011, 012 |
 | Baseline (P02) | `sandbox.filesystem.denyWrite` mirroring **every** Edit/Write deny (`.claude`,`~/.claude`,`CLAUDE.md`,`.mcp.json`,`spec.md`, shell rc) | Edit denies don't promise to stop Bash writes | 012 |
 | Baseline (P02) | env `GIT_OPTIONAL_LOCKS=0` | Read-only `git status` won't write | 009 |
 | **Switch-over (P10)** | `sandbox.filesystem.denyWrite` **add** `project/state/**`, `STATE.md`, `project/.git`, `code/.git`, `spine.yaml` | Only the spine writes state/git once it owns them | 006, 009, 012 |

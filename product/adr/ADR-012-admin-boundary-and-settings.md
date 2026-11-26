@@ -5,11 +5,11 @@ title: Human-only boundary & settings — OS-enforced spine-admin binary, consol
 stage: architecture
 status: accepted
 superseded_by:
-version: 6
+version: 7
 refs: [SEC-001, SEC-002, SEC-007, REQ-013]
 visibility: internal
 author: architect
-updated: 2026-11-25
+updated: 2026-11-26
 ---
 
 ## Context
@@ -66,7 +66,9 @@ scope is chosen for precedence + coverage); only `strictAllowlist` is strictly u
   writes.
 - `sandbox.filesystem.denyRead`: `.env*`, the WSL keychain fallback file, home credentials
   (`~/.ssh`, `~/.aws`, `~/.config/gh`, `~/.npmrc`, `~/.netrc`, `~/.git-credentials`)
-- `sandbox.credentials`: token env vars with **`mode: "deny"`**. Masking (`mode: "mask"`) is **not**
+- `sandbox.credentials`: `envVars` entries `{ "name": "<VAR>", "mode": "deny" }` for token env vars, and
+  `files` entries `{ "path": "<path>", "mode": "deny" }` (paths follow the `sandbox.filesystem` prefix
+  rules). Masking (`mode: "mask"`) is **not**
   used — now or as a future option: it needs `sandbox.network.tlsTerminate` + an `injectHosts`
   destination reachable through `allowedDomains`, which the no-network agent posture forbids, and on
   macOS (tier 1) `mask` is applied as `deny` regardless. This is a workspace-scope key (CC honours it
