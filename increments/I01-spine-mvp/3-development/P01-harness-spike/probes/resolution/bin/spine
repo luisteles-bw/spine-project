@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Stub `spine` for the T05 PATH-shadow test. If THIS runs, a PATH entry shadowed the intended binary.
+# It only identifies itself; no real logic.
+echo "STUB spine ran: argv=[$*]; command -v spine -> $(command -v spine)"

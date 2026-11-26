@@ -1,0 +1,8 @@
+{
+  "sandbox": {
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "excludedCommands": ["spine *"],
+    "network": { "strictAllowlist": true }
+  }
+}

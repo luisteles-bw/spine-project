@@ -1,0 +1,22 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "denyWrite": ["/Users/luisteles/spine-harness-probe/state/**"],
+      "denyRead": ["/Users/luisteles/spine-harness-probe/**/.env*"]
+    },
+    "network": { "allowedDomains": [] },
+    "credentials": {
+      "envVars": [{ "name": "PROBE_TOKEN", "mode": "deny" }]
+    }
+  },
+  "permissions": {
+    "disableBypassPermissionsMode": "disable",
+    "deny": [
+      "Edit(./state/**)",
+      "Read(./**/.env*)",
+      "Bash(spine-admin *)"
+    ]
+  },
+  "disableAutoMode": "disable"
+}
