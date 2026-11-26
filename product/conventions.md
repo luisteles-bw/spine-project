@@ -4,11 +4,11 @@ type: conventions
 title: Spine coding conventions
 stage: discovery
 status: approved
-version: 2
+version: 3
 refs: [SPEC]
 visibility: internal
 author: architect
-updated: 2026-11-22
+updated: 2026-11-26
 ---
 
 Defaults for the spine's own code. An ADR can change any of them; when it does, update this file
@@ -62,3 +62,11 @@ and bump `version`.
 - Conventional Commits: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`.
 - Trailers on every task commit: `Task: P03-T02` and `Attempt: 2` (also `Ticket`/`CR` where relevant),
   set via git's `--trailer`. `project/` transition commits carry `Spine-Seq: <n>` (ADR-009).
+
+## Corrections vs change requests (after a gate)
+- A **correction** edits an already-approved document to fix a **fact, key path, shape or wording
+  without changing any decision**. It gets an amend line in the document and a `STATE.md` log line, and
+  **reopens no gate**. All corrections made during a phase are re-checked together by `/review-adr` at
+  that phase's review (ADR-018).
+- An edit that **changes a decision** is **not** a correction: raise a **CR** (internal or client),
+  which triggers its own `adr` review (ADR-018).

@@ -5,11 +5,11 @@ title: Independent design reviews for the architecture stage
 stage: architecture
 status: accepted
 superseded_by:
-version: 3
+version: 4
 refs: [REQUIREMENTS, SECURITY, ADR-010]
 visibility: internal
 author: architect
-updated: 2026-11-24
+updated: 2026-11-26
 ---
 
 ## Context
@@ -58,6 +58,12 @@ only file it writes is its review file), runs in three modes:
 - **Amended 2026-11-24:** applied the ADR-018 adr review — added Options + Impact, clarified
   write-protection (SEC-014 / SEC-019), and the guard denies `design-reviewer` reading
   `topics/*.architect.md` in all modes (dropped "in topic mode").
+- **Amended 2026-11-26 (post-gate corrections rule):** after `stage_exit`, an ADR edit that corrects a
+  **fact, key path, shape or wording without changing any decision** is a **correction** — it gets an
+  amend line here and a `STATE.md` log line and **reopens no gate**. All corrections made during a phase
+  are re-checked together by `/review-adr` at that phase's review (for P01: ADR-012 v7 plus any from
+  T01–T05). An edit that **changes a decision** is **not** a correction: it needs a **CR** (internal or
+  client), which triggers its own `adr` review under this ADR.
 
 ## Impact
 
