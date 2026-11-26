@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "deny": ["Bash(spine-admin *)"]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "filesystem": {
+      "denyWrite": ["/Users/luisteles/spine-harness-probe/state/**"]
+    }
+  }
+}

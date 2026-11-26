@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Probe stub `spine` — matched by sandbox.excludedCommands ["spine *"], so it runs UNSANDBOXED
+# and its write to the protected state dir should succeed. Only appends; no real logic.
+STATE="${HOME}/spine-harness-probe/state"
+case "${1:-}" in
+  probe-write)
+    echo "spine wrote at $(date +%s)" >> "${STATE}/probe.txt"
+    echo "spine: appended to ${STATE}/probe.txt (exit $?)"
+    ;;
+  *)
+    echo "spine: unknown subcommand '${1:-}'" >&2
+    exit 2
+    ;;
+esac

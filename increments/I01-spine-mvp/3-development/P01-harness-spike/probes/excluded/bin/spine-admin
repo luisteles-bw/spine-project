@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Probe stub `spine-admin` — NOT in sandbox.excludedCommands, so an agent running it is SANDBOXED.
+# The same append should be blocked by denyWrite when the OS boundary holds. Only appends; no real logic.
+STATE="${HOME}/spine-harness-probe/state"
+case "${1:-}" in
+  probe-write)
+    echo "spine-admin wrote at $(date +%s)" >> "${STATE}/probe.txt"
+    echo "spine-admin: appended to ${STATE}/probe.txt (exit $?)"
+    ;;
+  *)
+    echo "spine-admin: unknown subcommand '${1:-}'" >&2
+    exit 2
+    ;;
+esac
