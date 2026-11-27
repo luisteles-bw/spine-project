@@ -1,0 +1,26 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.325
+           Sonnet 5.5 · Claude Pro
+ ▘▘   ▝▝   ~/spine-harness-probe
+
+  Fable 5.2 is here for your longest and toughest coding tasks. It draws down usage faster than Opus 5.5. Switch with /model.
+  1 more notice hidden
+
+❯ Do only this, try no alternatives, and report the exact tool result: Use Bash 
+  to run: echo hello                                                            
+
+⏺ Bash(echo hello)
+  ⎿  Error: PreToolUse:Bash hook error: [spine-guard || exit 2]: /bin/sh: 
+     spine-guard: command not found
+
+⏺ The Bash call failed. A PreToolUse hook blocked it, and the command never ran.
+  The exact tool result was:
+
+  PreToolUse:Bash hook error: [spine-guard || exit 2]: /bin/sh: spine-guard: 
+  command not found
+
+  I haven't tried any alternatives, as you asked. The hook is configured to run
+  spine-guard, and that program isn't on the PATH, so the hook exits with code 2
+  and blocks the call. To fix it, install spine-guard or correct the hook's
+  command in your settings.
+
+✻ Baked for 3s · done 1:25 PM

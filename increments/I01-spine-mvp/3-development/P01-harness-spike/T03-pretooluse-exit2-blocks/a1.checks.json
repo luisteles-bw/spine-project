@@ -1,0 +1,61 @@
+{
+  "note": "P01 is a records-only harness-verification spike. There is no code/ project; pnpm lint, pnpm typecheck, pnpm test and pnpm build are N/A. The checks below are grep cross-checks run by the Verifier against the captured session transcripts and control files.",
+  "attempt": 1,
+  "ran_at": "2026-11-27T13:40:55Z",
+  "checks": [
+    {
+      "name": "AC-1: exit-2 block confirmed — Error prefix present on first call",
+      "command": "grep -n 'Error: PreToolUse:Bash hook error' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/exit2-session1.txt",
+      "exit_code": 0,
+      "summary": "Line 12 contains 'Error: PreToolUse:Bash hook error:' for the first echo PROBE_MARKER ok call; confirms CC treated exit 2 as a blocking error"
+    },
+    {
+      "name": "AC-1: exit-2 block confirmed — 'exiting 2' seen in first call block, no stdout output before AC-2",
+      "command": "grep -n 'exiting 2' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/exit2-session1.txt",
+      "exit_code": 0,
+      "summary": "2 matches; lines 14 and 21 (hook stderr and agent echo); no 'PROBE_MARKER ok' stdout output exists before line 25 (the AC-1 call ends at line 24)"
+    },
+    {
+      "name": "AC-1: exit-2 block confirmed — agent confirms call did not run",
+      "command": "grep -n \"didn't run\" project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/exit2-session1.txt",
+      "exit_code": 0,
+      "summary": "Line 16: 'The Bash call didn't run. A PreToolUse hook blocked it' — agent explicitly confirms the command was blocked"
+    },
+    {
+      "name": "AC-2: non-blocking exit-1 confirmed — 'Failed with non-blocking status code' present",
+      "command": "grep -n 'Failed with non-blocking status code' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/exit2-session1.txt",
+      "exit_code": 0,
+      "summary": "Line 32: 'Failed with non-blocking status code: probe hook: PROBE_MARKER seen; exiting 1' — CC's exact wording confirming exit 1 is non-blocking"
+    },
+    {
+      "name": "AC-2: command output present — 'PROBE_MARKER ok' stdout at line 34",
+      "command": "grep -n 'PROBE_MARKER ok' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/exit2-session1.txt",
+      "exit_code": 0,
+      "summary": "Line 34 is the actual stdout output '  PROBE_MARKER ok'; lines 9, 11, 28, 30 are prompt/call display text, not command output. The command ran."
+    },
+    {
+      "name": "AC-3: spine-guard absent confirmed by control file",
+      "command": "cat project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/guard-absent.txt",
+      "exit_code": 0,
+      "summary": "guard-absent.txt contains 'spine-guard not on PATH' — confirms the binary was genuinely absent when session2 ran"
+    },
+    {
+      "name": "AC-3: fail-closed block confirmed — 'command not found' error in session2",
+      "command": "grep -n 'spine-guard: command not found' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/exit2-session2.txt",
+      "exit_code": 0,
+      "summary": "Lines 13 and 19: '/bin/sh: spine-guard: command not found'; CC ran the hook via /bin/sh, missing binary (127) → '|| exit 2' → exit 2 → block"
+    },
+    {
+      "name": "AC-3: fail-closed block confirmed — command never ran in session2",
+      "command": "grep -n 'never ran\\|blocked it' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/exit2-session2.txt",
+      "exit_code": 0,
+      "summary": "Line 15: 'The Bash call failed. A PreToolUse hook blocked it, and the command never ran.' — echo hello output is absent; fail-closed confirmed"
+    },
+    {
+      "name": "Version consistency — v2.1.325 across both sessions and version.txt",
+      "command": "grep -l '2.1.325' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/exit2-session1.txt project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/exit2-session2.txt project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/exit2/output/version.txt",
+      "exit_code": 0,
+      "summary": "All three files report Claude Code v2.1.325; version.txt: '2.1.325 (Claude Code)'; session banners: 'Claude Code v2.1.325'"
+    }
+  ]
+}

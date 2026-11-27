@@ -1,0 +1,43 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.325
+           Sonnet 5.5 · Claude Pro
+ ▘▘   ▝▝   ~/spine-harness-probe
+
+  Fable 5.2 is here for your longest and toughest coding tasks. It draws down usage faster than Opus 5.5. Switch with /model.
+  1 more notice hidden
+
+❯ Do only this, try no alternatives, and report the exact tool result: Use Bash 
+  to run: echo PROBE_MARKER ok                                                  
+
+⏺ Bash(echo PROBE_MARKER ok)
+  ⎿  Error: PreToolUse:Bash hook error: 
+     [/Users/luisteles/spine-harness-probe/hooks/hook.sh]: probe hook: 
+     PROBE_MARKER seen; exiting 2
+
+⏺ The Bash call didn't run. A PreToolUse hook blocked it, and this is the exact
+  result:
+
+  PreToolUse:Bash hook error: 
+  [/Users/luisteles/spine-harness-probe/hooks/hook.sh]: probe hook: PROBE_MARKER
+  seen; exiting 2
+
+  You asked me not to try alternatives, so I stopped there.
+
+✻ Baked for 3s · done 1:18 PM
+
+❯ Do only this, try no alternatives, and report the exact tool result: Use Bash 
+  to run: echo PROBE_MARKER ok                                                  
+
+⏺ Bash(echo PROBE_MARKER ok)
+  ⎿  PreToolUse:Bash hook error
+  ⎿  Failed with non-blocking status code: probe hook: PROBE_MARKER seen; 
+     exiting 1
+  ⎿  PROBE_MARKER ok
+
+⏺ The exact tool result was:
+
+  PROBE_MARKER ok
+
+  The command ran this time. The earlier attempt was blocked by the PreToolUse
+  hook, but the hook didn't block this one.
+
+✻ Sautéed for 2s · done 1:21 PM
