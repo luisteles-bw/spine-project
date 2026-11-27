@@ -1,0 +1,91 @@
+{
+  "attempt": 1,
+  "ran_at": "2026-11-27T02:10:17Z",
+  "note": "P01 is a records-only harness-verification spike. There is no code/ project to build. Standard toolchain checks (pnpm lint, pnpm typecheck, pnpm test, pnpm build) are N/A. The checks array documents real grep/wc/cat cross-checks run against the captured evidence files.",
+  "checks": [
+    {
+      "name": "AC-1: append exit code",
+      "command": "grep 'append exit=' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session1.txt",
+      "exit_code": 0,
+      "summary": "append exit=1 confirmed in session1 output"
+    },
+    {
+      "name": "AC-1: line count unchanged",
+      "command": "grep 'lines before=' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session1.txt",
+      "exit_code": 0,
+      "summary": "lines before=1 after=1 confirmed; file line count did not change"
+    },
+    {
+      "name": "AC-1: Operation not permitted in session",
+      "command": "grep -c 'Operation not permitted' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session1.txt",
+      "exit_code": 0,
+      "summary": "2 occurrences found (append + cat); append refusal confirmed"
+    },
+    {
+      "name": "AC-1: state-after.txt unchanged",
+      "command": "wc -c project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/state-after.txt",
+      "exit_code": 0,
+      "summary": "5 bytes (seed\\n); file content is still 'seed', not modified by the probe"
+    },
+    {
+      "name": "AC-1: state-listing.txt shows probe.txt at 5 bytes",
+      "command": "grep 'probe' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/state-listing.txt",
+      "exit_code": 0,
+      "summary": "Only probe.txt present, 5 bytes, no probe2.txt; write was physically blocked"
+    },
+    {
+      "name": "AC-2: Edit tool refused (session1)",
+      "command": "grep -c 'denied by your permission' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session1.txt",
+      "exit_code": 0,
+      "summary": "2 tool_use_error messages with permission-settings text; Edit (Create) and Write both refused"
+    },
+    {
+      "name": "AC-2: Edit tool refused on existing file (session2)",
+      "command": "grep 'tool_use_error' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session2.txt",
+      "exit_code": 0,
+      "summary": "Session2 Read confirmed file exists (content: seed), then Update(state/probe.txt) refused with same permission error; resolves session1 Create ambiguity"
+    },
+    {
+      "name": "AC-2: no probe2.txt created (Write blocked)",
+      "command": "grep 'probe2' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/state-listing.txt",
+      "exit_code": 1,
+      "summary": "grep returned exit=1 (no match); probe2.txt was never created on disk, confirming Write tool was physically blocked"
+    },
+    {
+      "name": "AC-3: cat exit code",
+      "command": "grep 'cat exit=' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session1.txt",
+      "exit_code": 0,
+      "summary": "cat exit=1 confirmed; nested .env read blocked by denyRead"
+    },
+    {
+      "name": "AC-3: node EPERM",
+      "command": "grep -c 'EPERM' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session1.txt",
+      "exit_code": 0,
+      "summary": "2 EPERM occurrences confirmed; node readFileSync also blocked with node exit=1"
+    },
+    {
+      "name": "AC-4: PROBE_TOKEN unset in session1",
+      "command": "grep 'PROBE_TOKEN' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session1.txt",
+      "exit_code": 0,
+      "summary": "PROBE_TOKEN=[<unset>] confirmed in session1 probe output"
+    },
+    {
+      "name": "AC-4: PROBE_TOKEN unset in session2",
+      "command": "grep 'PROBE_TOKEN' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session2.txt",
+      "exit_code": 0,
+      "summary": "PROBE_TOKEN=[<unset>] confirmed in session2 direct Bash echo"
+    },
+    {
+      "name": "AC-4: PROBE_TOKEN set in launching shell (control)",
+      "command": "grep 'PROBE_TOKEN' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/token-control.txt",
+      "exit_code": 0,
+      "summary": "token-control.txt shows 'PROBE_TOKEN in launching shell: should-be-hidden'; emptiness inside sandbox is a real credentials-deny, not an unset var"
+    },
+    {
+      "name": "version: consistency across all three sources",
+      "command": "grep 'v2.1.325' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session1.txt && grep 'v2.1.325' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/denywrite-session2.txt && grep '2.1.325' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/denywrite/output/version.txt",
+      "exit_code": 0,
+      "summary": "Claude Code v2.1.325 confirmed in both session banners and version.txt"
+    }
+  ]
+}
