@@ -4,8 +4,13 @@
 STATE="${HOME}/spine-harness-probe/state"
 case "${1:-}" in
   probe-write)
-    echo "spine-admin wrote at $(date +%s)" >> "${STATE}/probe.txt"
-    echo "spine-admin: appended to ${STATE}/probe.txt (exit $?)"
+    if echo "spine-admin wrote at $(date +%s)" >> "${STATE}/probe.txt"; then
+      echo "spine-admin: appended to ${STATE}/probe.txt (exit 0)"
+    else
+      ec=$?
+      echo "spine-admin: write to ${STATE}/probe.txt FAILED, nothing appended (exit ${ec})" >&2
+      exit "${ec}"
+    fi
     ;;
   *)
     echo "spine-admin: unknown subcommand '${1:-}'" >&2
