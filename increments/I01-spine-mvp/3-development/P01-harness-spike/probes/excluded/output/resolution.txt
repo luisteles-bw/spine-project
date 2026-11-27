@@ -1,0 +1,2 @@
+/Users/luisteles/spine-harness-probe/bin/spine
+/Users/luisteles/spine-harness-probe/bin/spine-admin

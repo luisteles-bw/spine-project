@@ -1,0 +1,4 @@
+total 8
+drwxr-xr-x@  3 luisteles  staff   96 26 Nov 19:47 .
+drwxr-xr-x@ 12 luisteles  staff  384 27 Nov 02:31 ..
+-rw-r--r--@  1 luisteles  staff   31 27 Nov 02:29 probe.txt

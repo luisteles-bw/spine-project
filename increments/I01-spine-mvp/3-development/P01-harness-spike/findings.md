@@ -22,7 +22,7 @@ updated: 2026-11-26
 
 | Field | Value |
 | --- | --- |
-| Claude Code version | `______` (expected 2.1.325; `claude --version`) |
+| Claude Code version | **2.1.325** — confirmed (T01 & T02 session banners + each probe's `version.txt`) |
 | Platform / tier | macOS arm64 — tier 1 |
 | Where run | throwaway workspace `~/spine-harness-probe/` under the switch-over settings |
 | Settings-validating command | `______` (record: CLI `claude doctor` vs in-session `/doctor` — see T05) |
@@ -30,18 +30,22 @@ updated: 2026-11-26
 ## T01 — denyWrite · Edit-deny · denyRead · credentials  (ADR-006, ADR-012)
 | AC | Expected | Result | Evidence (probes/denywrite/output/) |
 | --- | --- | --- | --- |
-| AC-1 | Bash append to `state/` blocked; file unchanged |  |  |
-| AC-2 | Edit **and** Write to `state/**` blocked by `Edit(./state/**)` |  |  |
-| AC-3 | nested `.env` read (cat/node) blocked by `denyRead` |  |  |
-| AC-4 | `PROBE_TOKEN` hidden (`credentials.envVars` deny) |  |  |
-| failIfUnavailable | **not testable on macOS tier 1** — covered by docs + `doctor` key recognition | n/a |  |
+| AC-1 | Bash append to `state/` blocked; file unchanged | **PASS** | `denywrite-session1.txt` — "Operation not permitted", `append exit=1`, lines before=1 after=1; `state-after.txt` / `state-listing.txt` unchanged |
+| AC-2 | Edit **and** Write to `state/**` blocked by `Edit(./state/**)` | **PASS** | session1 Edit + Write both "denied by your permission settings"; session2 Read(`seed`)→Edit refused; no `probe2.txt` on disk |
+| AC-3 | nested `.env` read (cat/node) blocked by `denyRead` | **PASS** | `denywrite-session1.txt` — `cat` + `node` both EPERM, exit 1 |
+| AC-4 | `PROBE_TOKEN` hidden (`credentials.envVars` deny) | **PASS** | `[<unset>]` in sessions 1 & 2; `token-control.txt` shows it set in the launching shell |
+| failIfUnavailable | **not testable on macOS tier 1** — covered by docs + `doctor` key recognition | n/a | per T01 v5 AC-2 |
+
+> **T01 verdict: PASS** — record `T01-denywrite-blocks-append/a1.verify.md` (+ `a1.checks.json`, 14 cross-checks). Sessions ran under auto mode — see Surprises F-1 (AC-independent here).
 
 ## T02 — excludedCommands asymmetry  (ADR-012)
 | AC | Expected | Result | Evidence (probes/excluded/output/) |
 | --- | --- | --- | --- |
-| AC-1 | excluded `spine` writes `state/` (unsandboxed) |  |  |
-| AC-2 | `spine-admin` (prefix) → permission refusal (not OS boundary) |  |  |
-| AC-3 | full-path `spine-admin` → `denyWrite` block (OS boundary) |  |  |
+| AC-1 | excluded `spine` writes `state/` (unsandboxed) | **PASS** | `state-after-session1.txt` — one `spine wrote…` line (probe.txt 31 B); `resolution.txt` = stub first on PATH |
+| AC-2 | `spine-admin` (prefix) → permission refusal (not OS boundary) | **PASS** | `excluded-session1.txt` — "…has been denied"; no `spine-admin` line in state |
+| AC-3 | full-path `spine-admin` → `denyWrite` block (OS boundary) | **PASS\*** | `excluded-session2.txt` — "Operation not permitted", exit 1; `state-after-session2.txt` byte-identical to session1. **\*** OS boundary reached via a `bash`-wrapper + `--permission-mode default` relaunch; the session-1 full-path spelling was itself caught by the `Bash(spine-admin *)` deny (see Surprises F-2/F-3) |
+
+> **T02 verdict: PASS** — record `T02-excluded-vs-nonexcluded-write/a1.verify.md` (+ `a1.checks.json`).
 
 ## T03 — PreToolUse exit codes  (ADR-010)
 | AC | Expected | Result | Evidence (probes/exit2/output/) |
@@ -71,7 +75,11 @@ Exact `agent_type` field name + observed values: `______`
 | AC-5 | `claude doctor` / `/doctor` report no rejected/unknown entries |  |  |
 
 ## Surprises / deviations
-- (exact field names, exit codes, messages, unknown keys, scope behaviours)
+- **F-1 — Probes ran under auto mode (config gap, cross-cuts T01 & T02).** Neither the T01/T02 fixtures nor the live H0 `~/.claude/settings.json` set `disableAutoMode` (top-level) or `permissions.disableBypassPermissionsMode`, both of which the switch-over design requires (ADR-012). So "ask" permissions were auto-approved. The AC verdicts hold — `excludedCommands`, explicit `deny` rules and sandbox `denyWrite`/`denyRead` all fire independent of auto mode — but the **permission-prompt posture was not exercised**. **Action before T03–T05:** add `disableAutoMode: true` and `permissions.disableBypassPermissionsMode: true` to H0 (and the fixtures) so the remaining probes run the real hardened config; relevant to T05 AC-2/AC-3/AC-5 (key recognition + scope).
+- **F-2 — `Bash(spine-admin *)` matched the full-path spelling (T02).** In session 1 the prefix deny caught `~/…/bin/spine-admin probe-write` as well as the bare form — broader than a literal prefix. T02 AC-3's premise ("full path unmatched by the prefix deny") is therefore factually wrong. **Recommended correction** to T02 `task.md` AC-3 + `README.md` (fact/wording only, no decision change).
+- **F-3 — Deny bypass → "the sandbox is the wall" (T02, confirms ADR-012).** In session 2 a `bash <fullpath>` invocation under `--permission-mode default` evaded the `Bash(spine-admin *)` deny and ran, yet sandbox `denyWrite` still returned EPERM and nothing was written (state byte-identical to session 1). Defense-in-depth validated: Bash permission prefix rules are a speedbump; the OS sandbox is the real admin boundary.
+- **F-4 — Probe stub bug, fixed this session (T02).** `probes/excluded/bin/spine` and `bin/spine-admin` printed "appended" and exited 0 even on a failed write (`$?` captured the `echo`, not the `>>` redirect). Did not affect the verdict (writes judged from state files). **Fixed:** both stubs now print "appended (exit 0)" only on a successful write and otherwise report the failure to stderr and exit non-zero (success-path + failure-path both re-tested).
+- (T03–T05: field names, exit codes, messages, unknown keys, scope behaviours — to come.)
 
 ## Go / no-go  (T06-AC-2)
 **Verdict:** `______`  (GO = all probes green → P02 may start · NO-GO → CR before P02)

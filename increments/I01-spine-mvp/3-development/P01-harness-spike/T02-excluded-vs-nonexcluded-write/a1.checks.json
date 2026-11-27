@@ -1,0 +1,97 @@
+{
+  "attempt": 1,
+  "ran_at": "2026-11-27T02:52:28Z",
+  "note": "P01 is a records-only harness-verification spike. There is no code/ project; pnpm lint/typecheck/test/build are N/A. The checks below are grep/wc/diff cross-checks run by the Verifier against the captured session transcripts and state files.",
+  "checks": [
+    {
+      "name": "probe.txt byte count after session1",
+      "command": "wc -c project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/excluded/output/state-listing.txt (probe.txt size read from ls -la output) and python3 byte arithmetic: len('seed\\n')+len('spine wrote at 1795746590\\n') == 31",
+      "exit_code": 0,
+      "summary": "state-listing.txt shows probe.txt at 31 bytes; arithmetic confirms 5 (seed\\n) + 26 (spine wrote at 1795746590\\n) = 31. Exactly one spine line, no spine-admin line."
+    },
+    {
+      "name": "state-after-session1 and state-after-session2 byte-identical",
+      "command": "diff probes/excluded/output/state-after-session1.txt probes/excluded/output/state-after-session2.txt",
+      "exit_code": 0,
+      "summary": "diff exited 0; both files are 87 bytes (wc -c), same content: header line + 'seed' + 'spine wrote at 1795746590'. No spine-admin write landed in either session."
+    },
+    {
+      "name": "exactly one spine-wrote line in state-after-session1",
+      "command": "grep -c 'spine wrote at' probes/excluded/output/state-after-session1.txt",
+      "exit_code": 0,
+      "summary": "Count = 1. The excluded spine stub appended exactly once; no additional lines."
+    },
+    {
+      "name": "no spine-admin-wrote line in state-after-session1",
+      "command": "grep -c 'spine-admin wrote at' probes/excluded/output/state-after-session1.txt",
+      "exit_code": 1,
+      "summary": "grep -c returned 0 (exit 1 = no match). No spine-admin write landed after session1; both bare and full-path invocations were blocked."
+    },
+    {
+      "name": "no spine-admin-wrote line in state-after-session2",
+      "command": "grep -c 'spine-admin wrote at' probes/excluded/output/state-after-session2.txt",
+      "exit_code": 1,
+      "summary": "grep -c returned 0 (exit 1 = no match). No spine-admin write landed after session2; bash-wrapper invocation was blocked by sandbox denyWrite."
+    },
+    {
+      "name": "permission deny fired for bare spine-admin in session1",
+      "command": "grep -c 'Permission to use Bash with command spine-admin probe-write has been denied' probes/excluded/output/excluded-session1.txt",
+      "exit_code": 0,
+      "summary": "Count = 1. Permission layer refused bare 'spine-admin probe-write' via Bash(spine-admin *) deny rule."
+    },
+    {
+      "name": "permission deny also matched full-path spine-admin in session1",
+      "command": "grep 'Permission to use Bash with command ~/spine-harness-probe/bin/spine-admin' probes/excluded/output/excluded-session1.txt",
+      "exit_code": 0,
+      "summary": "Match found. The Bash(spine-admin *) deny rule matched the tilde-expanded full-path spelling too, not just bare 'spine-admin'. AC-3 original premise (full path unmatched by prefix deny) was false."
+    },
+    {
+      "name": "total permission-denied lines in session1",
+      "command": "grep -c 'Permission to use Bash with command' probes/excluded/output/excluded-session1.txt",
+      "exit_code": 0,
+      "summary": "Count = 4 (2 from the tool-call error block + 2 from the echoed text). Both spine-admin spellings (bare and full-path) were caught by the deny rule."
+    },
+    {
+      "name": "Operation not permitted in session2",
+      "command": "grep -c 'Operation not permitted' probes/excluded/output/excluded-session2.txt",
+      "exit_code": 0,
+      "summary": "Count = 3 occurrences. The sandbox denyWrite fired against 'bash ~/spine-harness-probe/bin/spine-admin probe-write' invocation, returning OS error EPERM."
+    },
+    {
+      "name": "exit 1 reported in session2 spine-admin output",
+      "command": "grep -c 'exit 1' probes/excluded/output/excluded-session2.txt",
+      "exit_code": 0,
+      "summary": "Count = 3. The stub's own output line reports '(exit 1)' confirming the >> redirect failed; stub bug causes it to still print 'appended' despite failure."
+    },
+    {
+      "name": "session2 used bash-wrapper to bypass permission deny",
+      "command": "grep 'Bash(bash ~/spine-harness-probe/bin/spine-admin probe-write)' probes/excluded/output/excluded-session2.txt",
+      "exit_code": 0,
+      "summary": "Match confirmed. Session2 used 'bash <fullpath>' to route around the Bash(spine-admin *) deny; the sandbox denyWrite was the layer that blocked the write."
+    },
+    {
+      "name": "version consistency across session1, session2, version.txt",
+      "command": "grep 'v2.1.325\\|2.1.325' probes/excluded/output/excluded-session1.txt probes/excluded/output/excluded-session2.txt probes/excluded/output/version.txt",
+      "exit_code": 0,
+      "summary": "All three files report Claude Code v2.1.325 / 2.1.325 (Claude Code). Version is consistent."
+    },
+    {
+      "name": "resolution.txt confirms probe stubs were first on PATH",
+      "command": "cat probes/excluded/output/resolution.txt",
+      "exit_code": 0,
+      "summary": "command -v spine = /Users/luisteles/spine-harness-probe/bin/spine; command -v spine-admin = /Users/luisteles/spine-harness-probe/bin/spine-admin. Probe stubs were resolved, not any system binary."
+    },
+    {
+      "name": "stub bug confirmed: spine exit-0-on-failure",
+      "command": "read probes/excluded/bin/spine",
+      "exit_code": 0,
+      "summary": "Line 7 appends; line 8 echoes 'appended to ... (exit $?)'. Because echo itself succeeds, $? is 0 at that point regardless of whether the >> redirect failed. Stub unconditionally exits 0 and prints 'appended' even on write failure."
+    },
+    {
+      "name": "stub bug confirmed: spine-admin exit-0-on-failure",
+      "command": "read probes/excluded/bin/spine-admin",
+      "exit_code": 0,
+      "summary": "Same pattern as spine. echo on line 8 captures exit code of echo, not of the >> redirect. Stub exits 0 and prints 'appended' even when the sandbox blocks the write. The 'appended' stdout message is not evidence of a successful write."
+    }
+  ]
+}

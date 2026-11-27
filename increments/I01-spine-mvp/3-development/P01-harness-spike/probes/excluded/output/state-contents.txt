@@ -1,0 +1,3 @@
+== /Users/luisteles/spine-harness-probe/state/probe.txt
+seed
+spine wrote at 1795746590
