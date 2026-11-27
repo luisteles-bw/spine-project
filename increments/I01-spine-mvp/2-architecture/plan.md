@@ -6,11 +6,11 @@ increment: I01
 stage: architecture
 parent: I01
 status: draft
-version: 6
+version: 7
 refs: [REQUIREMENTS, SECURITY, ARCH, ADR-001, ADR-009, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015, ADR-016, ADR-017, ADR-018]
 visibility: internal
 author: architect
-updated: 2026-11-25
+updated: 2026-11-27
 ---
 
 > **v2 (2026-11-23), pre-gate review.** Split old P05 (CLI) and P06 (checks+git) so no phase breaks the
@@ -33,6 +33,12 @@ updated: 2026-11-25
 >
 > **v6 (2026-11-26):** pinned the exact `sandbox.credentials` entry shape from the CC sandboxing docs —
 > `envVars` `{ name, mode }`, `files` `{ path, mode }` — in the baseline settings row (mirrors ADR-012 v7).
+>
+> **v7 (2026-11-27), correction (P01-T02 finding F-1, no decision change):** added `disableAutoMode`
+> (top level) + `permissions.disableBypassPermissionsMode` to the **H0 machine-setup** keys (user scope),
+> so auto mode / bypass can't be re-enabled per-workspace — the P01 probe workspace ran in auto mode
+> because H0 lacked them. These keys are already in the P02 baseline (unchanged). Correction → **no
+> `plan` gate reopen** (re-checked at P01's phase review, ADR-018).
 
 ## Phases
 
@@ -141,6 +147,7 @@ MCP (incl. Context7) runs outside the sandbox, and the excluded `spine` makes it
 | **Machine setup (H0, `spine-admin setup` → `~/.claude/settings.json`, once per machine)** | `sandbox.failIfUnavailable: true`, `sandbox.allowUnsandboxedCommands: false` | Scope "Any file", but set at user level for precedence + coverage: a user-level value overrides a project override and covers every workspace. Must be present before P01 (`spine-admin init` exits 3 if absent) | 006, 012, D7 |
 | Machine setup (H0) | `sandbox.excludedCommands: ["spine *"]` | Set at user scope so an agent can't relax it via a project `.claude/settings.json` (scope "Any file") | 006, 012, D7 |
 | Machine setup (H0) | `sandbox.network.strictAllowlist: true` (no `allowedDomains`); needs **CC ≥ v2.1.219** | **Truly user/managed-only** scope; agent Bash has no network (D2). Key path resolved against current docs (stage review F2) | D2, 012, D7 |
+| Machine setup (H0, added 2026-11-27 — P01 finding F-1) | top-level `disableAutoMode` + `permissions.disableBypassPermissionsMode` | Also set at **user scope** so auto mode / bypass can't be re-enabled per-workspace; every workspace — incl. the P01 probe workspace — then runs the hardened posture (F-1: H0 lacked these, so P01 ran in auto mode). **Also kept in the P02 baseline** (below). Exact value form per the CC settings reference, confirmed by **P01-T05** (AC-2/AC-5) | 012, D7 |
 | **Baseline (P02)** | `sandbox.enabled: true` | Enable the sandbox | 006, 012 |
 | Baseline (P02) | `sandbox.network.allowedDomains: []` | Workspace-scope duplicate of machine-level strictAllowlist (documentation only; not relied on) | D2, 012, D7 |
 | Baseline (P02) | `permissions.disableBypassPermissionsMode: "disable"` (under `permissions`); top-level `disableAutoMode: "disable"` | Close the mode-switch escape hatches (note the differing key scopes per the CC settings reference) | 012 |
@@ -165,7 +172,7 @@ MCP (incl. Context7) runs outside the sandbox, and the excluded `spine` makes it
 
 | # | Task | When | Why |
 | --- | --- | --- | --- |
-| H0 | **Apply user-level settings block** — until `spine-admin setup` ships, manually add the machine-level keys (`sandbox.failIfUnavailable: true`, `sandbox.allowUnsandboxedCommands: false`, `sandbox.excludedCommands: ["spine *"]`, `sandbox.network.strictAllowlist: true`) to `~/.claude/settings.json` | **Before P01** | These keys are ignored from workspace scope; `spine-admin init` exits 3 if any are absent; P01 probes assume the hardened config is in place |
+| H0 | **Apply user-level settings block** — until `spine-admin setup` ships, manually add the machine-level keys (`sandbox.failIfUnavailable: true`, `sandbox.allowUnsandboxedCommands: false`, `sandbox.excludedCommands: ["spine *"]`, `sandbox.network.strictAllowlist: true`, and — added 2026-11-27, F-1 — top-level `disableAutoMode` + `permissions.disableBypassPermissionsMode`) to `~/.claude/settings.json` | **Before P01** (auto-mode keys added mid-P01) | These keys are ignored from workspace scope; `spine-admin init` exits 3 if any are absent; P01 probes assume the hardened config is in place. From **P01-T03 on, launch probes with `claude --permission-mode default`** |
 | H1 | **Client bootstrap kit** — package this workspace's commands, agents and baseline settings (minus spine-specific docs) + the `nextjs-static` overlay as a **manual checklist**, same `STATE.md` format | Before the first December client starts | Lets a client run in bootstrap mode now; same format means ADR-016 import works for it later |
 | H2 | **Install Twenty now**; use built-in Opportunities/Companies natively for December sales, with `taxonomy.json` stage names | Now | Real pipeline before `sync` (P12); no rework of categories later |
 | H3 | **Bootstrap backup** — push `project/` by hand after each `/approve` (until `spine-admin` exists, then D4 automates it) | Now, every approval | `project/` is the only home of the event log |

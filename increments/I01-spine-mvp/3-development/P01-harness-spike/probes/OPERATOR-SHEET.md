@@ -4,9 +4,14 @@ Run each probe in a **fresh Terminal window**; paste that section's boilerplate 
 (`setopt interactivecomments` lets the `#` comments paste cleanly in an interactive zsh). Copy a new
 `settings.json` per probe, set env/PATH, then launch a fresh `claude` so the settings load.
 
-**Prerequisites:** H0 is in `~/.claude/settings.json` (user scope):
+**Prerequisites:** H0 is in `~/.claude/settings.json` (user scope, machine-wide):
 `sandbox.failIfUnavailable:true`, `sandbox.allowUnsandboxedCommands:false`,
-`sandbox.excludedCommands:["spine *"]`, `sandbox.network.strictAllowlist:true`.
+`sandbox.excludedCommands:["spine *"]`, `sandbox.network.strictAllowlist:true`, and (added 2026-11-27,
+finding **F-1**) top-level `disableAutoMode` + `permissions.disableBypassPermissionsMode`.
+
+**Launch mode:** T01–T02 ran under **auto mode** and are shown as-run. **From T03 on, launch with
+`claude --permission-mode default`** (not bare `claude`) so no auto-mode auto-approval masks the
+permission layer (F-1).
 
 **Evidence (every probe):** in the session run `/export` and save the transcript as
 `probes/<name>/output/<name>-session<n>.txt` (one per session). Also copy the named log/state files
@@ -269,7 +274,7 @@ export PATH="$WS/bin:$PATH"
 ```
 
 ```zsh
-cd $WS && claude
+cd $WS && claude --permission-mode default
 ```
 
 Prompts (AC-1 shadow + AC-2/AC-5 keys):
@@ -281,6 +286,14 @@ Use Bash to run: command -v spine
 ```text
 Use Bash to run: spine probe-write
 ```
+
+F-2 open question (does `Bash(spine-admin *)` match a bare full path, or did auto mode refuse it in T02 session 1?) — this session is launched `--permission-mode default`, so run:
+
+```text
+Use Bash to run: ~/spine-harness-probe/bin/spine-admin probe-write
+```
+
+Record which happens — **refused with no prompt** → the `Bash(spine-admin *)` rule matched the full path; **a prompt appears, or it runs** → in T02 session 1 it was auto mode, not the rule. Put the answer into findings **F-2**.
 
 ```text
 /doctor

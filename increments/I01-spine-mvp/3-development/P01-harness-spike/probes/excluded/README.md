@@ -19,14 +19,14 @@ boundary, not an env/TTY/permission-prefix trick.
 ## Run (inside the hardened session)
 - **AC-1** — run `spine probe-write` (bare command → matched by `excludedCommands`, runs unsandboxed).
 - **AC-2** — run `spine-admin probe-write` (bare command → prefix form).
-- **AC-3** — run `$HOME/spine-harness-probe/bin/spine-admin probe-write` (**full path**).
+- **AC-3** — run an invocation the `Bash(spine-admin *)` deny does **not** match, e.g. `bash $HOME/spine-harness-probe/bin/spine-admin probe-write`.
 
 ## Pass / fail
 | AC | PASS |
 | --- | --- |
 | AC-1 | `spine probe-write` succeeds; the line lands in `state/probe.txt` (ran unsandboxed) |
 | AC-2 | `spine-admin probe-write` is refused by the permission deny `Bash(spine-admin *)` — a permission refusal, **not** proof of the OS boundary |
-| AC-3 | the **full-path** `spine-admin` (unmatched by the prefix deny) is blocked by sandbox `denyWrite` — this is the OS boundary |
+| AC-3 | an invocation the `Bash(spine-admin *)` deny doesn't match (e.g. `bash <path>/spine-admin`) still has its write blocked by sandbox `denyWrite` — the OS boundary (a bare full path may itself be caught by the deny — see the T05 open-question probe) |
 
 A FAIL (`spine` blocked, or either `spine-admin` form landing a write) → red probe; name **ADR-012** for
 the T06 go/no-go. Record the CC version; paste raw output into `./output/`.
