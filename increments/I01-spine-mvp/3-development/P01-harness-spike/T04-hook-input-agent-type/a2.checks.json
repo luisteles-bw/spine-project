@@ -1,0 +1,49 @@
+{
+  "attempt": 2,
+  "ran_at": "2026-11-28T02:01:39Z",
+  "note": "P01 is a records-only spike. There is no code/ project; pnpm lint / typecheck / test / build do not apply and were not run. The checks below are grep cross-checks of the captured evidence files.",
+  "checks": [
+    {
+      "name": "srt-proxy-string-present",
+      "command": "grep -c 'srt\\.' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/agent-type/output/ac3-network-rerun.txt",
+      "exit_code": 0,
+      "summary": "3 matches — sandbox-runtime (srt.) proxy URL present in curl -v output, confirming the srt proxy mediated the connection"
+    },
+    {
+      "name": "403-allowlist-response-present",
+      "command": "grep -c '403 host is not on the allow list' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/agent-type/output/ac3-network-rerun.txt",
+      "exit_code": 0,
+      "summary": "2 matches — HTTP/1.1 403 host is not on the allow list appears in both the CONNECT response and the agent summary"
+    },
+    {
+      "name": "x-proxy-error-header-present",
+      "command": "grep -c 'X-Proxy-Error: blocked-by-allowlist' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/agent-type/output/ac3-network-rerun.txt",
+      "exit_code": 0,
+      "summary": "2 matches — X-Proxy-Error: blocked-by-allowlist header present, confirming the strictAllowlist policy triggered the deny"
+    },
+    {
+      "name": "curl-error-56-present",
+      "command": "grep -c 'curl: (56)' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/agent-type/output/ac3-network-rerun.txt",
+      "exit_code": 0,
+      "summary": "1 match — curl: (56) CONNECT tunnel failed, response 403 — machine-readable network error captured"
+    },
+    {
+      "name": "curl-exit-56-echo-present",
+      "command": "grep -c 'curl exit=56' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/agent-type/output/ac3-network-rerun.txt",
+      "exit_code": 0,
+      "summary": "1 match — the probe's echo confirms the shell saw exit code 56"
+    },
+    {
+      "name": "sandbox-violations-block-present",
+      "command": "grep -c 'deny network-outbound example.com:443' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/agent-type/output/ac3-network-rerun.txt",
+      "exit_code": 0,
+      "summary": "1 match — <sandbox_violations> block records deny network-outbound example.com:443 (host is not on the allow list)"
+    },
+    {
+      "name": "launch-permission-mode-default",
+      "command": "grep -c '\\-\\-permission-mode default' project/increments/I01-spine-mvp/3-development/P01-harness-spike/probes/agent-type/output/ac3-launch.txt",
+      "exit_code": 0,
+      "summary": "1 match — ac3-launch.txt records 'claude --model sonnet --permission-mode default', confirming hardened posture"
+    }
+  ]
+}
