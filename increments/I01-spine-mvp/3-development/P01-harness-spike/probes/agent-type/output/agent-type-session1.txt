@@ -1,0 +1,50 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.325
+           Sonnet 5.5 · Claude Pro
+ ▘▘   ▝▝   ~/spine-harness-probe
+
+
+❯ /status 
+  ⎿  Settings dialog dismissed
+
+❯ Do only this, try no alternatives, and report the exact tool output: Use Bash 
+  to run: echo main-session-call                                                
+
+⏺ Bash(echo main-session-call)
+  ⎿  main-session-call
+
+⏺ Exact tool output:
+
+  main-session-call
+
+✻ Baked for 2s · done 3:08 PM
+
+❯ Do only this and report the results: dispatch a general-purpose subagent that 
+  runs three separate Bash commands, one tool call each: echo one, then echo    
+  two, then echo three.                                                         
+
+⏺ Agent(Run three echo commands)
+  ⎿  Backgrounded agent (↓ to manage · ctrl+o to expand)
+
+⏺ I've dispatched the general-purpose subagent. It's running in the background,
+  and I'll report its results once it finishes.
+
+✻ Cooked for 2s · done 3:08 PM
+
+⏺ Agent "Run three echo commands" finished · 4s
+
+⏺ The subagent finished. It ran three separate Bash commands, one tool call
+  each, and reported these outputs:
+
+  1. echo one printed one
+  2. echo two printed two
+  3. echo three printed three
+
+✻ Cooked for 7s · done 3:09 PM
+
+❯ Do only this, try no alternatives, and report the exact tool output: Use Bash 
+  to run: curl -sS https://example.com                                          
+
+⏺ Bash(curl -sS https://example.com)
+  ⎿  Interrupted · What should Claude do instead?
+
+✻ Cogitated for 1s · done 3:09 PM

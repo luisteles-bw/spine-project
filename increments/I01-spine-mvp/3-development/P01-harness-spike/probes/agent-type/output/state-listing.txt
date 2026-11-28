@@ -1,0 +1,5 @@
+total 16
+drwxr-xr-x@  4 luisteles  staff  128 27 Nov 15:08 .
+drwxr-xr-x@ 16 luisteles  staff  512 27 Nov 15:10 ..
+-rw-r--r--@  1 luisteles  staff  125 27 Nov 15:09 hook-unsandboxed.txt
+-rw-r--r--@  1 luisteles  staff   31 27 Nov 02:29 probe.txt

@@ -59,13 +59,15 @@ updated: 2026-11-26
 ## T04 — agent_type · network · unsandboxed hook  (ADR-010)
 | AC | Expected | Result | Evidence (probes/agent-type/output/) |
 | --- | --- | --- | --- |
-| AC-1 | subagent firings carry `agent_type` |  |  |
-| AC-2 | main-session firing has no `agent_type` / sentinel |  |  |
-| AC-3 | network Bash call denied, **no** per-domain prompt |  |  |
-| AC-4 | same `agent_type` across ≥3 firings (CC #90662 absent) |  |  |
-| AC-5 | hook writes into `denyWrite` dir (hooks unsandboxed) |  |  |
+| AC-1 | subagent firings carry `agent_type` | **PASS** | `agent-type.log` ll.3/5/7 — `"agent_type":"general-purpose"` (+ `"agent_id":"a968639c9760103da"`) on all 3 subagent firings |
+| AC-2 | main-session firing has no `agent_type` / sentinel | **PASS** | `agent-type.log` ll.1/9 — neither `agent_type` nor `agent_id` on the main echo + curl firings |
+| AC-3 | network Bash call denied, **no** per-domain prompt | **FAIL (inconclusive)** | `agent-type-session1.txt` l.48 — curl "Interrupted · What should Claude do instead?", no curl error/HTML; **no per-domain prompt** (that half holds) but the denial was not captured → **re-run** `curl -sS --max-time 5 -v` (F-5) |
+| AC-4 | same `agent_type` across ≥3 firings (CC #90662 absent) | **PASS** | same `"agent_type":"general-purpose"` + `"agent_id":"a968639c9760103da"` on all 3 subagent firings — no intermittent absence |
+| AC-5 | hook writes into `denyWrite` dir (hooks unsandboxed) | **PASS** | `hook-unsandboxed.txt` (5 lines) + `"_probe_hook_write":"ok"` ×5 + `state-listing.txt` — hook wrote where agent Bash is blocked |
 
-Exact `agent_type` field name + observed values: `______`
+> **T04 verdict: REJECT (4/5)** — record `T04-hook-input-agent-type/a1.verify.md` (+ `a1.checks.json`). AC-1/2/4/5 pass cleanly; **AC-3 unproven** (curl interrupted, denial not captured) → bounded-curl re-run (F-5). Posture confirmed from evidence: `launch.txt` = `claude --model sonnet --permission-mode default`; `"permission_mode":"default"` on all 5 firings.
+
+Exact `agent_type` field name + observed values: **field name `agent_type` (string).** Subagent firings → `"agent_type":"general-purpose"` with `"agent_id":"a968639c9760103da"` (identical across all 3). Main-session firings (echo + curl) → **both fields absent** (the absence is the sentinel; guard maps "no `agent_type`" → main-session policy). Adjacent guard-relevant fields on every firing: `"permission_mode":"default"`, `"hook_event_name":"PreToolUse"`, `"tool_name":"Bash"`, shared `"session_id"`.
 
 ## T05 — resolution + settings keys  (ADR-012, ADR-017, SEC-020)
 | AC | Expected | Result | Evidence (probes/resolution/output/) |
@@ -81,7 +83,8 @@ Exact `agent_type` field name + observed values: `______`
 - **F-2 — T02 AC-3 premise corrected (applied; one open question).** AC-3 (task.md **v4** + README) now reads: an invocation the `Bash(spine-admin *)` deny doesn't match (e.g. `bash <path>/spine-admin`) still has its write blocked by `denyWrite`. The session-2 bypass came from the **`bash <path>` spelling** not matching the deny, **not** from a weaker permission mode — session 2 ran `--permission-mode default`, session 1 ran auto mode. **Open question:** session 1's refusal of the *bare* full path (`~/…/bin/spine-admin probe-write`, no `bash`) happened under auto mode, so we can't yet tell whether the `Bash(spine-admin *)` rule matched it or the auto-mode classifier refused it. A **T05 operator-sheet prompt** (run in `--permission-mode default`) resolves it — refused with no prompt → the rule matched; a prompt appears or it runs → it was auto mode. **Update this finding with the T05 answer.**
 - **F-3 — Deny bypass → "the sandbox is the wall" (T02, confirms ADR-012).** In session 2 a `bash <fullpath>` invocation under `--permission-mode default` evaded the `Bash(spine-admin *)` deny and ran, yet sandbox `denyWrite` still returned EPERM and nothing was written (state byte-identical to session 1). Defense-in-depth validated: Bash permission prefix rules are a speedbump; the OS sandbox is the real admin boundary.
 - **F-4 — Probe stub bug, fixed this session (T02).** `probes/excluded/bin/spine` and `bin/spine-admin` printed "appended" and exited 0 even on a failed write (`$?` captured the `echo`, not the `>>` redirect). Did not affect the verdict (writes judged from state files). **Fixed:** both stubs now print "appended (exit 0)" only on a successful write and otherwise report the failure to stderr and exit non-zero (success-path + failure-path both re-tested).
-- (T03–T05: field names, exit codes, messages, unknown keys, scope behaviours — to come.)
+- **F-5 — T04 AC-3 (network deny) unproven; re-run needed.** `curl -sS https://example.com` was "Interrupted" (~1 s), not a captured denial — no curl error, no per-domain prompt, no HTML. So D2's no-network claim is **not disproven** (nothing shows network success or a prompt) but **not confirmed** either. **Action:** re-run `curl -sS --max-time 5 -v https://example.com` in the hardened session (`strictAllowlist:true`, `allowedDomains:[]`); expect exit 6/28 + a curl error line + no prompt + no HTML; save to `probes/agent-type/output/ac3-network-rerun.txt`. **Blocks a clean GO for T04** until captured. (AC-1/2/4/5 passed; exact `agent_type` field recorded above.)
+- (T05: PATH-shadow, settings-key recognition/scope, version, F-2 open-question answer — to come.)
 
 ## Go / no-go  (T06-AC-2)
 **Verdict:** `______`  (GO = all probes green → P02 may start · NO-GO → CR before P02)

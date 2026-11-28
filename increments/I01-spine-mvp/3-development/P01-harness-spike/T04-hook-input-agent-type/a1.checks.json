@@ -1,0 +1,79 @@
+{
+  "attempt": 1,
+  "ran_at": "2026-11-27T15:14:57Z",
+  "note": "P01 is a records-only harness-verification spike. There is no code/ project; pnpm lint/typecheck/test/build do not apply and are not run. All checks below are grep/wc cross-checks against captured probe evidence.",
+  "checks": [
+    {
+      "name": "agent_type:general-purpose count in log",
+      "command": "grep -c '\"agent_type\":\"general-purpose\"' agent-type.log",
+      "exit_code": 0,
+      "summary": "3 lines matched — exactly the three subagent firings (echo one, echo two, echo three)"
+    },
+    {
+      "name": "main-session echo line present in log",
+      "command": "grep -c '\"tool_input\":{\"command\":\"echo main-session-call\"' agent-type.log",
+      "exit_code": 0,
+      "summary": "1 match — main-session firing recorded"
+    },
+    {
+      "name": "curl line present in log",
+      "command": "grep -c '\"tool_input\":{\"command\":\"curl -sS https://example.com\"' agent-type.log",
+      "exit_code": 0,
+      "summary": "1 match — curl firing recorded"
+    },
+    {
+      "name": "agent_type absent from main-session echo line",
+      "command": "grep '\"tool_input\":{\"command\":\"echo main-session-call\"' agent-type.log | grep -c '\"agent_type\"'",
+      "exit_code": 1,
+      "summary": "0 matches (grep exit 1 = no agent_type on main-session line) — field absent, as required"
+    },
+    {
+      "name": "agent_type absent from curl line",
+      "command": "grep '\"tool_input\":{\"command\":\"curl -sS https://example.com\"' agent-type.log | grep -c '\"agent_type\"'",
+      "exit_code": 1,
+      "summary": "0 matches (grep exit 1 = no agent_type on curl line) — main-session posture confirmed for curl call too"
+    },
+    {
+      "name": "_probe_hook_write:ok count",
+      "command": "grep -c '\"_probe_hook_write\":\"ok\"' agent-type.log",
+      "exit_code": 0,
+      "summary": "5 matches — hook write succeeded on every one of the 5 firings (1 main echo + 3 subagent echos + 1 curl)"
+    },
+    {
+      "name": "permission_mode:default on all 5 payload lines",
+      "command": "grep -c '\"permission_mode\":\"default\"' agent-type.log",
+      "exit_code": 0,
+      "summary": "5 matches — every payload carries permission_mode:default; confirms --permission-mode default launch, not auto mode"
+    },
+    {
+      "name": "agent_id consistent across subagent firings",
+      "command": "grep '\"agent_id\"' agent-type.log | grep -c '\"agent_id\":\"a968639c9760103da\"'",
+      "exit_code": 0,
+      "summary": "3 matches all share the same agent_id a968639c9760103da — no intermittent absence (CC #90662 not triggered)"
+    },
+    {
+      "name": "hook-unsandboxed.txt line count",
+      "command": "wc -l < state/hook-unsandboxed.txt",
+      "exit_code": 0,
+      "summary": "5 lines — one 'hook wrote at <epoch>' per firing; file exists in denyWrite state/ dir"
+    },
+    {
+      "name": "curl Interrupted in transcript",
+      "command": "grep -c 'Interrupted' agent-type-session1.txt",
+      "exit_code": 0,
+      "summary": "1 match — 'Interrupted · What should Claude do instead?' present; no curl output, no HTML, no per-domain prompt"
+    },
+    {
+      "name": "launch command",
+      "command": "cat output/launch.txt",
+      "exit_code": 0,
+      "summary": "Fri 27 Nov 2026 15:07:33 WET  claude --model sonnet --permission-mode default"
+    },
+    {
+      "name": "claude version",
+      "command": "cat output/version.txt",
+      "exit_code": 0,
+      "summary": "2.1.325 (Claude Code)"
+    }
+  ]
+}
